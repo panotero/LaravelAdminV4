@@ -277,7 +277,7 @@
 
                 showMessage({
                     status: "error",
-                    title: "Error Saving Headline",
+                    title: "Error Saving Options",
                     message: "There is some error saving your information. Please contact system administrator",
                 });
                 return;
@@ -296,7 +296,7 @@
 
             showMessage({
                 status: "success",
-                title: "Headline Saved!",
+                title: "Option Saved!",
             });
             clearinputs();
 
@@ -504,7 +504,7 @@
 
             showMessage({
                 status: "success",
-                title: "LOV Deleted!",
+                title: "Option Deleted!",
             });
 
             loadOptions();
