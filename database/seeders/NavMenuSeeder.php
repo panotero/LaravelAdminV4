@@ -24,14 +24,12 @@ class NavMenuSeeder extends Seeder
                 'menu_order' => '0'
             ],
             [
-
                 'title' => 'User Management',
                 'icon' => 'fas fa-users',
                 'link' => '/page_users',
                 'allowed_roles' => json_encode(['1']),
                 'parent_menu' => '0',
-                'menu_order' => '1'
-
+                'menu_order' => '6'
             ],
             [
                 'title' => 'Developer Option',
@@ -39,76 +37,96 @@ class NavMenuSeeder extends Seeder
                 'link' => '#',
                 'allowed_roles' => json_encode(['1']),
                 'parent_menu' => '0',
-                'menu_order' => '2'
+                'menu_order' => '8'
             ],
             [
                 'title' => 'Mailer',
                 'icon' => '',
                 'link' => '/page_mailer',
                 'allowed_roles' => json_encode(['1']),
-                'parent_menu' => 'Developer Option',
+                'parent_menu' => '3',
                 'menu_order' => '1'
-
             ],
             [
                 'title' => 'Menus',
                 'icon' => '',
                 'link' => '/page_menus',
                 'allowed_roles' => json_encode(['1']),
-                'parent_menu' => 'Developer Option',
+                'parent_menu' => '3',
                 'menu_order' => '2'
-
+            ],
+            [
+                'title' => 'Settings',
+                'icon' => '',
+                'link' => '#',
+                'allowed_roles' => json_encode(['1', '2', '3', '4']),
+                'parent_menu' => '0',
+                'menu_order' => '7'
+            ],
+            [
+                'title' => 'App Settings',
+                'icon' => '',
+                'link' => '/page_maintenance',
+                'allowed_roles' => json_encode(['1', '2', '3', '4']),
+                'parent_menu' => '6',
+                'menu_order' => '1'
+            ],
+            [
+                'title' => 'Booking',
+                'icon' => '',
+                'link' => '/page_bookings',
+                'allowed_roles' => json_encode(['1', '2', '3', '4']),
+                'parent_menu' => '0',
+                'menu_order' => '2'
+            ],
+            [
+                'title' => 'Shipper/Consignee',
+                'icon' => '',
+                'link' => '/page_shipperConsignee',
+                'allowed_roles' => json_encode(['1', '2', '3', '4']),
+                'parent_menu' => '0',
+                'menu_order' => '3'
+            ],
+            [
+                'title' => 'Contracts',
+                'icon' => '',
+                'link' => '/page_contracts',
+                'allowed_roles' => json_encode(['1', '2', '3', '4']),
+                'parent_menu' => '0',
+                'menu_order' => '4'
+            ],
+            [
+                'title' => 'Reports',
+                'icon' => '',
+                'link' => '/page_reports',
+                'allowed_roles' => json_encode(['1', '2', '3', '4']),
+                'parent_menu' => '0',
+                'menu_order' => '5'
+            ],
+            [
+                'title' => 'Lookup Values',
+                'icon' => '',
+                'link' => '/page_lookupValues',
+                'allowed_roles' => json_encode(['1']),
+                'parent_menu' => '3',
+                'menu_order' => '3'
             ]
         ];
 
+        foreach ($menu_array as $menu) {
 
-        //first lets saparate parent menu from child menu
-        $parent_menu = array_filter($menu_array, fn($menu) => $menu['parent_menu'] === '0');
-        // dd($parent_menu);
-        $child_menu = array_filter($menu_array, fn($menu) => $menu['parent_menu'] !== '0');
-
-
-        //in this section we need to create empty array to map the parent menu
-
-        $parentMap = [];
-
-        //now lets insert first the parent to the database
-        foreach ($parent_menu as $menu) {
-            $parent = NavMenu::firstOrCreate([
-                'title' => $menu['title'],
-                'icon' => $menu['icon'],
-                'link' => $menu['link'],
-                'allowed_roles' => $menu['allowed_roles']
-            ]);
-
-            //lets save the id of the parent menu
-            $parentMap[$menu['title']] = $parent->id;
-        }
-
-        //now lets insert the child menu
-        foreach ($child_menu as $menu) {
-            //first lets specify the parent menu title
-            $parentMenuTitle = $menu['parent_menu'];
-
-            //now lets get the id from the parentMap
-
-            $parentId = $parentMap[$parentMenuTitle] ?? 0;
-
-            //now lets check if the parent title is available on the parent map
-            if ($parentId) {
-
-                $parent = NavMenu::firstOrCreate([
-                    'title' => $menu['title'],
+            NavMenu::updateOrCreate(
+                [
+                    'title' => $menu['title']
+                ],
+                [
                     'icon' => $menu['icon'],
                     'link' => $menu['link'],
                     'allowed_roles' => $menu['allowed_roles'],
-                    'parent_menu' => $parentId
-                ]);
-            } else {
-                //to handle the missing parent id
-                echo "skipped {$menu['title']} parent is not found on the array";
-            }
-            dump($parentMap);
+                    'parent_menu' => $menu['parent_menu'],
+                    'menu_order' => $menu['menu_order']
+                ]
+            );
         }
     }
 }

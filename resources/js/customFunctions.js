@@ -80,3 +80,75 @@ window.closemodals = function closemodals() {
     }
   });
 };
+
+window.renderRows = function renderRows(
+  tablebodyID,
+  data,
+  clickableRow = false,
+  functionToCallOnRowClick = null,
+) {
+  const tbody = document.getElementById(tablebodyID);
+
+  if (!tbody) {
+    console.error(`Table body "${tablebodyID}" not found.`);
+    return;
+  }
+
+  tbody.innerHTML = "";
+
+  if (!Array.isArray(data) || data.length === 0) {
+    tbody.innerHTML = `
+            <tr>
+                <td colspan="100%" class="text-center py-5 text-gray-500">
+                    No records found.
+                </td>
+            </tr>
+        `;
+    return;
+  }
+
+  data.forEach((row) => {
+    const tr = document.createElement("tr");
+
+    tr.className = `
+            border-b border-gray-200
+            hover:bg-gray-50
+            transition
+        `;
+
+    let rowId = row.id ?? null;
+
+    if (clickableRow) {
+      tr.classList.add("cursor-pointer");
+
+      tr.addEventListener("click", (e) => {
+        if (e.target.closest("button")) {
+          return;
+        }
+        if (typeof functionToCallOnRowClick === "function") {
+          functionToCallOnRowClick(rowId);
+        }
+      });
+    }
+
+    Object.entries(row).forEach(([key, value]) => {
+      // ✅ SKIP ID COLUMN
+      if (key === "id") return;
+      const td = document.createElement("td");
+      td.className = "px-4 py-3";
+
+      // Action column (HTML allowed)
+      if (key.toLowerCase() === "action") {
+        td.innerHTML = value;
+      } else {
+        td.textContent = value ?? "-";
+      }
+
+      tr.appendChild(td);
+    });
+
+    tbody.appendChild(tr);
+  });
+
+  initDataTables(10);
+};

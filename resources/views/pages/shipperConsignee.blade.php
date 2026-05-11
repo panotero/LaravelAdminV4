@@ -1,5 +1,67 @@
-<div class="container mx-auto space-y-5">
+<div class="container mx-auto space-y-5 p-5">
+    <div class="grid md:grid-cols-6 grid-cols-2 gap-4">
 
+        <!-- Lead -->
+        <div
+            class="p-5 border border-zinc-300 drop-shadow-sm dark:bg-zinc-700 dark:text-white bg-white text-zinc-700 rounded-lg">
+            <div class="flex justify-between">
+                <p class="text-sm">Lead</p>
+                <div class="w-3 h-3 rounded-full bg-amber-400"></div>
+            </div>
+            <p class="font-semibold text-3xl" id="cc_lead">123</p>
+        </div>
+
+        <!-- Qualified -->
+        <div
+            class="p-5 border border-zinc-300 drop-shadow-sm dark:bg-zinc-700 dark:text-white bg-white text-zinc-700 rounded-lg">
+            <div class="flex justify-between">
+                <p class="text-sm">Qualified</p>
+                <div class="w-3 h-3 rounded-full bg-blue-400"></div>
+            </div>
+            <p class="font-semibold text-3xl" id="cc_qualified">85</p>
+        </div>
+
+        <!-- Opportunity -->
+        <div
+            class="p-5 border border-zinc-300 drop-shadow-sm dark:bg-zinc-700 dark:text-white bg-white text-zinc-700 rounded-lg">
+            <div class="flex justify-between">
+                <p class="text-sm">Opportunity</p>
+                <div class="w-3 h-3 rounded-full bg-violet-400"></div>
+            </div>
+            <p class="font-semibold text-3xl" id="cc_opportunity">42</p>
+        </div>
+
+        <!-- Negotiation -->
+        <div
+            class="p-5 border border-zinc-300 drop-shadow-sm dark:bg-zinc-700 dark:text-white bg-white text-zinc-700 rounded-lg">
+            <div class="flex justify-between">
+                <p class="text-sm">Negotiation</p>
+                <div class="w-3 h-3 rounded-full bg-orange-400"></div>
+            </div>
+            <p class="font-semibold text-3xl" id="cc_negotiation">18</p>
+        </div>
+
+        <!-- Win -->
+        <div
+            class="p-5 border border-zinc-300 drop-shadow-sm dark:bg-zinc-700 dark:text-white bg-white text-zinc-700 rounded-lg">
+            <div class="flex justify-between">
+                <p class="text-sm">Win</p>
+                <div class="w-3 h-3 rounded-full bg-emerald-400"></div>
+            </div>
+            <p class="font-semibold text-3xl" id="cc_win">10</p>
+        </div>
+
+        <!-- Lost -->
+        <div
+            class="p-5 border border-zinc-300 drop-shadow-sm dark:bg-zinc-700 dark:text-white bg-white text-zinc-700 rounded-lg">
+            <div class="flex justify-between">
+                <p class="text-sm">Lost</p>
+                <div class="w-3 h-3 rounded-full bg-red-400"></div>
+            </div>
+            <p class="font-semibold text-3xl" id="cc_lost">7</p>
+        </div>
+
+    </div>
     <button id="newCustomer" class="px-5 py-2 rounded-lg bg-orange-400 hover:bg-orange-600 text-white font-bold">New
         Customer</button>
     <div class=" overflow-auto bg-white rounded-lg text-black border-2 border-slate-100 drop-shadow-md p-5">
@@ -32,7 +94,8 @@
 
                     </tr>
                 </thead>
-                <tbody class="bg-gray-100">
+
+                <tbody id="companyTableBody" class="bg-gray-100">
 
                 </tbody>
             </table>
@@ -88,30 +151,31 @@
                         <div class="flex flex-col">
                             <label class="text-sm">Customer Code</label>
                             <input required type="text" id="customer_code"
-                                class="border p-2 rounded-lg dark:bg-zinc-800 dark:text-white">
+                                class="border p-2 border-zinc-200 dark:border-zinc-500 rounded-lg dark:bg-zinc-800 dark:text-white">
                         </div>
 
                         <div class="flex flex-col">
                             <label class="text-sm">Company Name</label>
                             <input required type="text" id="company_name"
-                                class="border p-2 rounded-lg dark:bg-zinc-800 dark:text-white">
+                                class="border p-2 border-zinc-200 dark:border-zinc-500 rounded-lg dark:bg-zinc-800 dark:text-white">
                         </div>
 
                         <div class="flex flex-col col-span-2">
                             <label class="text-sm">Registered Address</label>
-                            <textarea required id="registered_address" class="border p-2 rounded-lg dark:bg-zinc-800 dark:text-white"></textarea>
+                            <textarea required id="registered_address"
+                                class="border p-2 border-zinc-200 dark:border-zinc-500 rounded-lg dark:bg-zinc-800 dark:text-white"></textarea>
                         </div>
 
                         <div class="flex flex-col">
                             <label class="text-sm">Contact Number 1</label>
                             <input required type="tel" id="contact_number_1"
-                                class="border p-2 rounded-lg dark:bg-zinc-800 dark:text-white">
+                                class="border p-2 border-zinc-200 dark:border-zinc-500 rounded-lg dark:bg-zinc-800 dark:text-white">
                         </div>
 
                         <div class="flex flex-col">
                             <label class="text-sm">Contact Number 2</label>
                             <input type="tel" id="contact_number_2"
-                                class="border p-2 rounded-lg dark:bg-zinc-800 dark:text-white">
+                                class="border p-2 border-zinc-200 dark:border-zinc-500 rounded-lg dark:bg-zinc-800 dark:text-white">
                         </div>
 
                         <!-- Industry Dropdown -->
@@ -119,7 +183,7 @@
                             <label class="text-sm">Industry</label>
 
                             <select required id="industry"
-                                class="border p-2 rounded-lg dark:bg-zinc-800 dark:text-white">
+                                class="border p-2 border-zinc-200 dark:border-zinc-500 rounded-lg dark:bg-zinc-800 dark:text-white">
                                 <option value="">Select Industry</option>
                                 <option value="logistics">Logistics</option>
                                 <option value="manufacturing">Manufacturing</option>
@@ -137,32 +201,32 @@
                         <div class="flex flex-col">
                             <label class="text-sm">Organization Type</label>
                             <input required type="text" id="organization_type"
-                                class="border p-2 rounded-lg dark:bg-zinc-800 dark:text-white">
+                                class="border p-2 border-zinc-200 dark:border-zinc-500 rounded-lg dark:bg-zinc-800 dark:text-white">
                         </div>
 
                         <div class="flex flex-col">
                             <label class="text-sm">Tax Identification Number</label>
                             <input required type="text" id="tin"
-                                class="border p-2 rounded-lg dark:bg-zinc-800 dark:text-white">
+                                class="border p-2 border-zinc-200 dark:border-zinc-500 rounded-lg dark:bg-zinc-800 dark:text-white">
                         </div>
 
                         <div class="flex flex-col">
                             <label class="text-sm">Business Start Date</label>
                             <input required type="date" id="business_start_date"
-                                class="border p-2 rounded-lg dark:bg-zinc-800 dark:text-white">
+                                class="border p-2 border-zinc-200 dark:border-zinc-500 rounded-lg dark:bg-zinc-800 dark:text-white">
                         </div>
 
                         <div class="flex flex-col">
                             <label class="text-sm">Number of Employees</label>
                             <input required type="number" min="0" id="employees"
-                                class="border p-2 rounded-lg dark:bg-zinc-800 dark:text-white">
+                                class="border p-2 border-zinc-200 dark:border-zinc-500 rounded-lg dark:bg-zinc-800 dark:text-white">
                         </div>
 
                         <div class="flex flex-col">
                             <label class="text-sm">Synkar</label>
 
                             <select required id="synkar"
-                                class="border p-2 rounded-lg dark:bg-zinc-800 dark:text-white">
+                                class="border p-2 border-zinc-200 dark:border-zinc-500 rounded-lg dark:bg-zinc-800 dark:text-white">
                                 <option value="">Select Option</option>
                                 <option value="1">Yes</option>
                                 <option value="0">No</option>
@@ -172,19 +236,19 @@
                         <div class="flex flex-col">
                             <label class="text-sm">Estimated Annual Revenue</label>
                             <input required type="number" min="0" step="0.01" id="annual_revenue"
-                                class="border p-2 rounded-lg dark:bg-zinc-800 dark:text-white">
+                                class="border p-2 border-zinc-200 dark:border-zinc-500 rounded-lg dark:bg-zinc-800 dark:text-white">
                         </div>
 
                         <div class="flex flex-col">
                             <label class="text-sm">Estimated Net Income</label>
                             <input required type="number" min="0" step="0.01" id="net_income"
-                                class="border p-2 rounded-lg dark:bg-zinc-800 dark:text-white">
+                                class="border p-2 border-zinc-200 dark:border-zinc-500 rounded-lg dark:bg-zinc-800 dark:text-white">
                         </div>
 
                         <div class="flex flex-col col-span-2">
                             <label class="text-sm">Company URL</label>
                             <input required type="url" id="company_url"
-                                class="border p-2 rounded-lg dark:bg-zinc-800 dark:text-white">
+                                class="border p-2 border-zinc-200 dark:border-zinc-500 rounded-lg dark:bg-zinc-800 dark:text-white">
                         </div>
 
                     </div>
@@ -218,7 +282,7 @@
                                 <label class="text-sm dark:text-white">Contact Name</label>
 
                                 <input required type="text"
-                                    class="contact_name border p-2 rounded-lg dark:bg-zinc-800 dark:text-white"
+                                    class="contact_name border p-2 border-zinc-200 dark:border-zinc-500 rounded-lg dark:bg-zinc-800 dark:text-white"
                                     placeholder="Contact Name">
                             </div>
 
@@ -226,7 +290,7 @@
                                 <label class="text-sm dark:text-white">Contact Number</label>
 
                                 <input required type="tel"
-                                    class="contact_number border p-2 rounded-lg dark:bg-zinc-800 dark:text-white"
+                                    class="contact_number border p-2 border-zinc-200 dark:border-zinc-500 rounded-lg dark:bg-zinc-800 dark:text-white"
                                     placeholder="Contact Number">
                             </div>
 
@@ -234,7 +298,7 @@
                                 <label class="text-sm dark:text-white">Email Address</label>
 
                                 <input required type="email"
-                                    class="contact_email border p-2 rounded-lg dark:bg-zinc-800 dark:text-white"
+                                    class="contact_email border p-2 border-zinc-200 dark:border-zinc-500 rounded-lg dark:bg-zinc-800 dark:text-white"
                                     placeholder="Email Address">
                             </div>
 
@@ -242,7 +306,7 @@
                                 <label class="text-sm dark:text-white">Role</label>
 
                                 <select required
-                                    class="contact_role border p-2 rounded-lg dark:bg-zinc-800 dark:text-white">
+                                    class="contact_role border p-2 border-zinc-200 dark:border-zinc-500 rounded-lg dark:bg-zinc-800 dark:text-white">
                                     <option value="">Select Role</option>
                                     <option value="manager">Manager</option>
                                 </select>
@@ -252,7 +316,7 @@
                                 <label class="text-sm dark:text-white">Position</label>
 
                                 <select required
-                                    class="contact_position border p-2 rounded-lg dark:bg-zinc-800 dark:text-white">
+                                    class="contact_position border p-2 border-zinc-200 dark:border-zinc-500 rounded-lg dark:bg-zinc-800 dark:text-white">
                                     <option value="">Select Position</option>
                                     <option value="head">Head</option>
                                 </select>
@@ -279,7 +343,7 @@
                         <label class="text-sm dark:text-white">Business Name</label>
 
                         <input required type="text" id="business_name"
-                            class="border p-2 rounded-lg dark:bg-zinc-800 dark:text-white w-full"
+                            class="border p-2 border-zinc-200 dark:border-zinc-500 rounded-lg dark:bg-zinc-800 dark:text-white w-full"
                             placeholder="Business Name" />
                     </div>
 
@@ -287,14 +351,15 @@
                         <label class="text-sm dark:text-white">Nature of Relationship</label>
 
                         <input required type="text" id="relationship"
-                            class="border p-2 rounded-lg dark:bg-zinc-800 dark:text-white w-full"
+                            class="border p-2 border-zinc-200 dark:border-zinc-500 rounded-lg dark:bg-zinc-800 dark:text-white w-full"
                             placeholder="Nature of Relationship" />
                     </div>
 
                     <div class="flex flex-col">
                         <label class="text-sm dark:text-white">Business Address</label>
 
-                        <textarea required id="business_address" class="border p-2 rounded-lg dark:bg-zinc-800 dark:text-white w-full"
+                        <textarea required id="business_address"
+                            class="border p-2 border-zinc-200 dark:border-zinc-500 rounded-lg dark:bg-zinc-800 dark:text-white w-full"
                             placeholder="Business Address"></textarea>
                     </div>
 
@@ -302,7 +367,7 @@
                         <label class="text-sm dark:text-white">Contact Person</label>
 
                         <input required type="text" id="ref_contact_person"
-                            class="border p-2 rounded-lg dark:bg-zinc-800 dark:text-white w-full"
+                            class="border p-2 border-zinc-200 dark:border-zinc-500 rounded-lg dark:bg-zinc-800 dark:text-white w-full"
                             placeholder="Contact Person" />
                     </div>
 
@@ -310,7 +375,7 @@
                         <label class="text-sm dark:text-white">Phone Number</label>
 
                         <input required type="tel" id="ref_phone"
-                            class="border p-2 rounded-lg dark:bg-zinc-800 dark:text-white w-full"
+                            class="border p-2 border-zinc-200 dark:border-zinc-500 rounded-lg dark:bg-zinc-800 dark:text-white w-full"
                             placeholder="Phone Number" />
                     </div>
 
@@ -318,7 +383,7 @@
                         <label class="text-sm dark:text-white">Email Address</label>
 
                         <input required type="email" id="ref_email"
-                            class="border p-2 rounded-lg dark:bg-zinc-800 dark:text-white w-full"
+                            class="border p-2 border-zinc-200 dark:border-zinc-500 rounded-lg dark:bg-zinc-800 dark:text-white w-full"
                             placeholder="Email Address" />
                     </div>
 
@@ -338,7 +403,7 @@
                         <label class="text-sm dark:text-white">Credit Terms</label>
 
                         <select required id="credit_terms"
-                            class="border p-2 rounded-lg dark:bg-zinc-800 dark:text-white w-full">
+                            class="border p-2 border-zinc-200 dark:border-zinc-500 rounded-lg dark:bg-zinc-800 dark:text-white w-full">
                             <option value="">Select Option</option>
                             <option value="15">15 Days</option>
                             <option value="30">30 Days</option>
@@ -348,7 +413,7 @@
                     <div class="flex flex-col">
                         <label class="text-sm dark:text-white">Payment Mode</label>
                         <select required id="payment_mode"
-                            class="border p-2 rounded-lg dark:bg-zinc-800 dark:text-white w-full">
+                            class="border p-2 border-zinc-200 dark:border-zinc-500 rounded-lg dark:bg-zinc-800 dark:text-white w-full">
                             <option value="">Select Option</option>
                             <option value="COLLECT DESTINATION">COLLECT DESTINATION</option>
                             <option value="PREPAID">PREPAID</option>
@@ -380,7 +445,7 @@
                             <label class="text-sm dark:text-white">Invoice Email Address</label>
 
                             <input required type="email" id="invoice_email_address"
-                                class="border p-2 rounded-lg dark:bg-zinc-800 dark:text-white w-full"
+                                class="border p-2 border-zinc-200 dark:border-zinc-500 rounded-lg dark:bg-zinc-800 dark:text-white w-full"
                                 placeholder="Invoice Email Address" />
                         </div>
                     </div>
@@ -390,21 +455,21 @@
                         <div class="flex flex-col">
                             <label class="text-sm dark:text-white">Recepient Name</label>
                             <input required type="text" id="courier_recepient_name"
-                                class="border p-2 rounded-lg dark:bg-zinc-800 dark:text-white w-full"
+                                class="border p-2 border-zinc-200 dark:border-zinc-500 rounded-lg dark:bg-zinc-800 dark:text-white w-full"
                                 placeholder="Email Address" />
                         </div>
                         <div class="flex flex-col">
                             <label class="text-sm dark:text-white">Recepient Contact</label>
 
                             <input required type="text" id="courier_recepient_contact"
-                                class="border p-2 rounded-lg dark:bg-zinc-800 dark:text-white w-full"
+                                class="border p-2 border-zinc-200 dark:border-zinc-500 rounded-lg dark:bg-zinc-800 dark:text-white w-full"
                                 placeholder="Email Address" />
                         </div>
                         <div class="flex flex-col">
                             <label class="text-sm dark:text-white">Recepient Addreess</label>
 
                             <input required type="text" id="courier_recepient_address"
-                                class="border p-2 rounded-lg dark:bg-zinc-800 dark:text-white w-full"
+                                class="border p-2 border-zinc-200 dark:border-zinc-500 rounded-lg dark:bg-zinc-800 dark:text-white w-full"
                                 placeholder="Email Address" />
                         </div>
                     </div>
@@ -416,21 +481,21 @@
                         <div class="flex flex-col">
                             <label class="text-sm dark:text-white">Document Handling</label>
                             <input required type="text" id="document_handling"
-                                class="border p-2 rounded-lg dark:bg-zinc-800 dark:text-white w-full"
+                                class="border p-2 border-zinc-200 dark:border-zinc-500 rounded-lg dark:bg-zinc-800 dark:text-white w-full"
                                 placeholder="Email Address" />
                         </div>
                         <div class="flex flex-col">
                             <label class="text-sm dark:text-white">Billing Summary Report</label>
 
                             <input required type="text" id="billing_summary_report"
-                                class="border p-2 rounded-lg dark:bg-zinc-800 dark:text-white w-full"
+                                class="border p-2 border-zinc-200 dark:border-zinc-500 rounded-lg dark:bg-zinc-800 dark:text-white w-full"
                                 placeholder="Email Address" />
                         </div>
                         <div class="flex flex-col">
                             <label class="text-sm dark:text-white">Other</label>
 
                             <input required type="text" id="other_billing_request"
-                                class="border p-2 rounded-lg dark:bg-zinc-800 dark:text-white w-full"
+                                class="border p-2 border-zinc-200 dark:border-zinc-500 rounded-lg dark:bg-zinc-800 dark:text-white w-full"
                                 placeholder="Email Address" />
                         </div>
                     </div>
@@ -446,7 +511,7 @@
                         <label class="text-sm dark:text-white">Account Owner / Sales Rep</label>
 
                         <input required type="text" id="account_owner"
-                            class="border p-2 rounded-lg dark:bg-zinc-800 dark:text-white w-full"
+                            class="border p-2 border-zinc-200 dark:border-zinc-500 rounded-lg dark:bg-zinc-800 dark:text-white w-full"
                             placeholder="Account Owner / Sales Rep" />
                     </div>
 
@@ -455,7 +520,7 @@
         </div>
 
         {{-- Footer --}}
-        <div class="border-t border-gray-200 px-6 py-4 flex justify-between">
+        <div class="border-t border-gray-200 px-6 py-4 flex justify-end">
 
 
             <div class="flex gap-3">
@@ -477,8 +542,303 @@
     </div>
 </div>
 
+{{-- Modal --}}
+<div id="CompanyInfoModal" class="fixed inset-0 hidden z-40 flex items-center justify-center bg-black/50 px-4 modal">
+    <div
+        class="bg-white dark:bg-zinc-800 rounded-2xl shadow-2xl w-full lg:max-w-[60vw] md:max-h-[70vh] overflow-y-auto">
+        {{-- Header --}}
+        <div class="w-full p-5 flex justify-between text-black dark:text-white border-b">
+            <p class="text-xl font-semibold" id="m_modal_title">
+            </p>
+        </div>
+
+        {{-- Contents --}}
+        <div class="max-h-[80vh] md:max-h-[50vh] overflow-y-auto p-5 space-y-6 text-sm dark:text-white">
+            <!-- ================= COMPANY INFO (Finance Style) ================= -->
+            <!-- ================= COMPANY INFO (2-COLUMN FINANCE STYLE) ================= -->
+            <div class="border p-4 rounded-lg space-y-2">
+
+                <p class="font-semibold text-lg">Company Information</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+
+                    <p>
+                        <span class="text-gray-400">Customer Code:</span>
+                        <span id="m_customer_code"></span>
+                    </p>
+
+                    <p>
+                        <span class="text-gray-400">Company Name:</span>
+                        <span id="m_company_name"></span>
+                    </p>
+
+                    <p>
+                        <span class="text-gray-400">Customer Type:</span>
+                        <span id="m_customer_type"></span>
+                    </p>
+
+                    <p>
+                        <span class="text-gray-400">Industry:</span>
+                        <span id="m_industry"></span>
+                    </p>
+
+                    <p>
+                        <span class="text-gray-400">Organization Type:</span>
+                        <span id="m_org_type"></span>
+                    </p>
+
+                    <p>
+                        <span class="text-gray-400">Registered Address:</span>
+                        <span id="m_address"></span>
+                    </p>
+
+                    <p>
+                        <span class="text-gray-400">Contact Number 1:</span>
+                        <span id="m_contact1"></span>
+                    </p>
+
+                    <p>
+                        <span class="text-gray-400">Contact Number 2:</span>
+                        <span id="m_contact2"></span>
+                    </p>
+
+                    <p>
+                        <span class="text-gray-400">Primary Contact Name:</span>
+                        <span id="m_contact_name"></span>
+                    </p>
+
+                    <p>
+                        <span class="text-gray-400">Primary Contact Email:</span>
+                        <span id="m_contact_email"></span>
+                    </p>
+
+                    <p>
+                        <span class="text-gray-400">Tax Identification Number:</span>
+                        <span id="m_tin"></span>
+                    </p>
+
+                    <p>
+                        <span class="text-gray-400">Company URL:</span>
+                        <span id="m_url" class="break-all"></span>
+                    </p>
+
+                    <p>
+                        <span class="text-gray-400">Number of Employees:</span>
+                        <span id="m_employees"></span>
+                    </p>
+
+
+                </div>
+            </div>
+
+            <!-- ================= FINANCE ================= -->
+            <div class="border p-4 rounded-lg space-y-2">
+                <p class="font-semibold text-lg">Finance</p>
+
+                <p><span class="text-gray-400">Credit Terms:</span> <span id="m_credit_terms"></span></p>
+                <p><span class="text-gray-400">Payment Mode:</span> <span id="m_payment_mode"></span></p>
+                <p><span class="text-gray-400">Invoice Mode:</span> <span id="m_invoice_mode"></span></p>
+                <p><span class="text-gray-400">Invoice Email:</span> <span id="m_invoice_email"></span></p>
+                <p><span class="text-gray-400">Email Address:</span> <span id="m_invoice_email_address"></span></p>
+                <p><span class="text-gray-400">Document Handling:</span> <span id="m_doc_handling"></span></p>
+                <p><span class="text-gray-400">Billing Report:</span> <span id="m_billing_report"></span></p>
+            </div>
+
+
+            <!-- ================= TRADE REFERENCE ================= -->
+            <div class="border p-4 rounded-lg space-y-2">
+                <p class="font-semibold text-lg">Trade Reference</p>
+
+                <div id="m_trade_container" class="space-y-2">
+
+                </div>
+            </div>
+
+            <!-- ================= CONTACTS ================= -->
+            <div class="border p-4 rounded-lg space-y-2">
+                <p class="font-semibold text-lg">Contacts</p>
+
+                <div id="m_contacts_container" class="space-y-2 grid grid-cols-1 md:grid-cols-2"></div>
+            </div>
+
+            <!-- ================= SALES ================= -->
+            <div class="border p-4 rounded-lg space-y-2">
+                <p class="font-semibold text-lg">Sales</p>
+                <p><span class="text-gray-400">Account Owner:</span> <span id="m_sales_owner"></span></p>
+            </div>
+
+        </div>
+
+        {{-- Footer --}}
+        <div class="border-t border-gray-200 px-6 py-4 flex justify-end">
+
+
+            <div class="flex gap-3">
+
+                <button
+                    class="modal-close border hover:bg-zinc-400 hover:text-white border-zinc-500 dark:bg-zinc-600 dark:text-white px-5 py-2 rounded-lg text-sm">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     (function() {
+        //fetching of rows
+        async function getCompanyList() {
+            const companies = await apiCall({
+                mode: "GET",
+                url: "/api/companies"
+            });
+
+            const tableData = companies.map(company => ({
+                id: company.id,
+                "Customer Code": company.customer_code,
+                "Company Name": company.company_name,
+                "Type": company.customer_type,
+                "Industry": company.industry,
+                "Primary Contact": company.contacts?.[0]?.contact_name ?? "-",
+                "Contact Number": company.contacts?.[0]?.contact_number ?? "-",
+                "Account Owner": company.sales?.account_owner ?? "-",
+                "Stage": company.stages?.stage_name ?? "-",
+                "Potential Volume": company.stages?.potential_volume ?? "-",
+                "Status": "Active",
+                "Action": `
+            <div class="flex justify-end gap-2">
+                <button class="px-3 py-1 bg-blue-500 text-white text-xs rounded" data-id="${company.id}">
+                    View
+                </button>
+            </div>
+        `
+            }));
+            renderRows(
+                'companyTableBody',
+                tableData,
+                true,
+                rowClick
+            );
+        }
+        getCompanyList();
+
+        async function rowClick(id) {
+            console.log("row clicked with ID: " + id);
+
+            const companies = await apiCall({
+                mode: "GET",
+                url: `/api/companies/${id}`
+            });
+            // console.log(companies);
+            fillCompanyModal(companies);
+            initModal({
+                modalId: "CompanyInfoModal",
+            })
+
+        }
+
+
+        function fillCompanyModal(data) {
+
+            const primary = data.contacts?.[0] || {};
+            const finance = data.finance || {};
+            const sales = data.sales || {};
+
+            document.getElementById('m_modal_title').textContent = data.company_name ?? '-';
+            // ================= COMPANY INFO =================
+            document.getElementById('m_customer_code').textContent = data.customer_code ?? '-';
+            document.getElementById('m_company_name').textContent = data.company_name ?? '-';
+            document.getElementById('m_customer_type').textContent = data.customer_type ?? '-';
+            document.getElementById('m_industry').textContent = data.industry ?? '-';
+            document.getElementById('m_employees').textContent = data.number_of_employees ?? '-';
+            document.getElementById('m_org_type').textContent = data.organization_type ?? '-';
+
+            document.getElementById('m_address').textContent = data.registered_address ?? '-';
+
+            document.getElementById('m_contact1').textContent = data.contact_number_1 ?? '-';
+            document.getElementById('m_contact2').textContent = data.contact_number_2 ?? '-';
+
+            document.getElementById('m_tin').textContent = data.tax_identification_number ?? '-';
+
+            document.getElementById('m_url').textContent = data.company_url ?? '-';
+            // ================= FINANCE =================
+            document.getElementById('m_credit_terms').textContent = finance.credit_terms ?? '-';
+            document.getElementById('m_payment_mode').textContent = finance.payment_mode ?? '-';
+            document.getElementById('m_invoice_mode').textContent = finance.invoice_mode ?? '-';
+            document.getElementById('m_invoice_email').textContent = finance.invoice_email ? 'Yes' : 'No';
+            document.getElementById('m_invoice_email_address').textContent = finance.invoice_email_address ?? '-';
+            document.getElementById('m_doc_handling').textContent = finance.document_handling ? 'Yes' : 'No';
+            document.getElementById('m_billing_report').textContent = finance.billing_summary_report ? 'Yes' : 'No';
+
+            // ================= SALES =================
+            document.getElementById('m_sales_owner').textContent = sales.account_owner ?? '-';
+
+            // ================= CONTACTS LIST =================
+            const contactsContainer = document.getElementById('m_contacts_container');
+            contactsContainer.innerHTML = '';
+
+            (data.contacts || []).forEach(c => {
+                const div = document.createElement('div');
+                div.className = "border p-2 border-zinc-200 dark:border-zinc-500 rounded";
+                div.innerHTML = `
+
+                    <p>
+                        <span class="text-gray-400">Name:</span>
+                        <span >${c.contact_name}</span>
+                    </p>
+                    <p>
+                        <span class="text-gray-400">Contact Number:</span>
+                        <span >${c.contact_number}</span>
+                    </p>
+                    <p>
+                        <span class="text-gray-400">Email:</span>
+                        <span >${c.email}</span>
+                    </p>
+                    <p>
+                        <span class="text-gray-400">Role:</span>
+                        <span >${c.role}</span>
+                    </p>
+                    <p>
+                        <span class="text-gray-400">Position:</span>
+                        <span >${c.position}</span>
+                    </p>
+        `;
+                contactsContainer.appendChild(div);
+            });
+
+            // ================= TRADE REFERENCES =================
+            const tradeContainer = document.getElementById('m_trade_container');
+            tradeContainer.innerHTML = '';
+
+            (data.trade_references || []).forEach(t => {
+                const div = document.createElement('div');
+                div.className = "border p-2 border-zinc-200 dark:border-zinc-500 rounded";
+                div.innerHTML = `
+
+                    <p>
+                        <span class="text-gray-400">Business Name:</span>
+                        <span >${t.business_name}</span>
+                    </p>
+                    <p>
+                        <span class="text-gray-400">Relationship:</span>
+                        <span >${t.relationship}</span>
+                    </p>
+                    <p>
+                        <span class="text-gray-400">Contact Person:</span>
+                        <span >${t.contact_person_name}</span>
+                    </p>
+                    <p>
+                        <span class="text-gray-400">Phone:</span>
+                        <span >${t.contact_phone}</span>
+                    </p>
+        `;
+                tradeContainer.appendChild(div);
+            });
+        }
+
+
+
+
         const newCustomerButton = document.getElementById("newCustomer");
         newCustomerButton.addEventListener("click", function() {
             initModal({
@@ -597,9 +957,9 @@
         }
 
         nextBtn.addEventListener('click', async function() {
-            // if (!validateCurrentStage()) {
-            //     return;
-            // }
+            if (!validateCurrentStage()) {
+                return;
+            }
             collect();
 
             console.log('STAGE ' + (currentStage + 1), JSON.parse(JSON.stringify(payload)));
@@ -629,6 +989,11 @@
                     });
                     return;
                 };
+
+                showMessage({
+                    status: "success",
+                    title: "Successfully Saved Company Info. Keep it up!",
+                });
 
                 currentStage = 0;
                 showStage(currentStage);
@@ -708,28 +1073,28 @@
     <div class="flex flex-col">
         <label class="text-sm dark:text-white">Contact Name</label>
         <input required
-            class="contact_name border p-2 rounded-lg dark:bg-zinc-800 dark:text-white"
+            class="contact_name border p-2 border-zinc-200 dark:border-zinc-500 rounded-lg dark:bg-zinc-800 dark:text-white"
             placeholder="Contact Name">
     </div>
 
     <div class="flex flex-col">
         <label class="text-sm dark:text-white">Contact Number</label>
         <input required
-            class="contact_number border p-2 rounded-lg dark:bg-zinc-800 dark:text-white"
+            class="contact_number border p-2 border-zinc-200 dark:border-zinc-500 rounded-lg dark:bg-zinc-800 dark:text-white"
             placeholder="Contact Number">
     </div>
 
     <div class="flex flex-col col-span-2">
         <label class="text-sm dark:text-white">Email Address</label>
         <input required
-            class="contact_email border p-2 rounded-lg dark:bg-zinc-800 dark:text-white"
+            class="contact_email border p-2 border-zinc-200 dark:border-zinc-500 rounded-lg dark:bg-zinc-800 dark:text-white"
             placeholder="Email Address">
     </div>
 
     <div class="flex flex-col">
         <label class="text-sm dark:text-white">Role</label>
         <select
-            class="contact_role border p-2 rounded-lg dark:bg-zinc-800 dark:text-white">
+            class="contact_role border p-2 border-zinc-200 dark:border-zinc-500 rounded-lg dark:bg-zinc-800 dark:text-white">
             <option value="">Select Role</option>
             <option value="manager">Manager</option>
         </select>
@@ -738,7 +1103,7 @@
     <div class="flex flex-col">
         <label class="text-sm dark:text-white">Position</label>
         <select
-            class="contact_position border p-2 rounded-lg dark:bg-zinc-800 dark:text-white">
+            class="contact_position border p-2 border-zinc-200 dark:border-zinc-500 rounded-lg dark:bg-zinc-800 dark:text-white">
             <option value="">Select Position</option>
             <option value="head">Head</option>
         </select>
@@ -771,7 +1136,6 @@
             }
         });
 
-        initDataTables(10);
 
 
         //function for invoice submission mode

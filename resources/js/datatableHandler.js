@@ -41,7 +41,8 @@ window.initDataTables = function initDataTables(rows = 10) {
 
     const tbody = document.querySelectorAll("table tbody tr");
     tbody.forEach((tr) => {
-      tr.className = "hover:bg-gray-300 bg-white duration-300 text-center";
+      tr.className =
+        "hover:bg-gray-300 bg-white duration-300 text-center cursor-pointer";
     });
 
     const pagination = document.querySelectorAll(".pagination");

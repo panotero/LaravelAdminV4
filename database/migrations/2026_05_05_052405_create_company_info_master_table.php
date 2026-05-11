@@ -38,6 +38,8 @@ return new class extends Migration
             // shipper / consignee tagging
             $table->enum('customer_type', ['shipper', 'consignee', 'both']);
 
+            // status 0 - Lead 1 - Qualified 2 - Opportunity 3 - Negotiation 4 - Win 5 - Lost
+            $table->integer('status')->default(0);
             $table->timestamps();
         });
     }
