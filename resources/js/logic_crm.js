@@ -107,6 +107,7 @@ window.initCrmLogic = function initCrmLogic() {
       modalId: "LeadInfoModal",
     });
     leadUUID = uuid;
+    window.uuid = uuid;
     loadLeadInfo();
   });
   $("#saveLeadBtn").on("click", async function (e) {
@@ -156,17 +157,6 @@ window.initCrmLogic = function initCrmLogic() {
     clearInputs();
     closeSideModal("LeadDetailsSideModal");
   });
-  async function updateLead(id) {
-    console.log("Update Lead", id);
-
-    /*
-            const response = await apiCall({
-                mode: "PUT",
-                url: `/api/crm/leads/${id}`,
-                body: formData
-            });
-            */
-  }
   async function deleteLead(id) {
     console.log("Delete Lead", id);
 
@@ -217,7 +207,10 @@ window.initCrmLogic = function initCrmLogic() {
       dropdown.innerHTML = html;
     });
   }
-
+  window.reloadCrmData = function () {
+    loadLeadInfo();
+    updateLeadDetails();
+  };
   async function loadLeadInfo() {
     const loader = loadingLine();
     $("#leadCompanyName").html(loader);
@@ -231,6 +224,7 @@ window.initCrmLogic = function initCrmLogic() {
     $("#leadExpectedCloseDate").html(loader);
     $("#noteContainer").html(loader);
     $("#activityContainer").html(loader);
+    document.getElementById("proposalContainer").innerHTML = loader;
 
     const leads = await apiCall({
       mode: "GET",
@@ -283,6 +277,8 @@ window.initCrmLogic = function initCrmLogic() {
 
     //render notes
     renderNotes(leads.data.notes);
+    //render proposals
+    renderProposals(leads.data.proposals);
   }
 
   function getLeadFormData() {
@@ -295,6 +291,48 @@ window.initCrmLogic = function initCrmLogic() {
       expected_close_date: $("#expected_close_date").val(),
     };
   }
+
+  function renderProposals(proposals) {
+    let html = "";
+    //select the container
+    const proposalContainer = document.getElementById("proposalContainer");
+    proposals.forEach((proposal) => {
+      const downloadurl = `/createpdf/${proposal.id}`;
+
+      //build activity html
+      html += `
+                       <div
+                            class="dark:bg-zinc-600 border border-zinc-300 rounded-md  p-1 w-full flex justify-between items-center">
+                            <div class="flex flex-col">
+
+                                <h1>${proposal.code}</h1>
+                                <p class="text-xs dark:text-zinc-300">${formatDateTime(proposal.created_at)}</p>
+                            </div>
+                            <a href="${downloadurl}"
+       target="_blank"
+       class="bg-orange-600 text-white rounded-md p-1">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+            stroke-width="1.5" stroke="currentColor" width="24" height="24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M7.5 10.5l4.5 4.5m0 0l4.5-4.5m-4.5 4.5V3" />
+        </svg>
+    </a>
+                        </div>
+            `;
+    });
+    if (proposals.length === 0) {
+      html = `
+
+                        <div class="w-full p-2 border border-zinc-300 rounded-md text-center">
+                            <p class="font-semibold text-zinc-400">Theres no proposal yet. create one now!</p>
+                            </div>
+                            `;
+    }
+
+    //append html to the container
+    proposalContainer.innerHTML = html;
+  }
+
   $(document).on("click", "#btnEditLead", function () {
     $(".lead-input").prop("readonly", false);
 
@@ -469,7 +507,6 @@ window.initCrmLogic = function initCrmLogic() {
       url: "/api/crm/activity",
       button: saveActivityBtn,
     });
-    console.log(response);
     if (!response.success) {
       showMessage({
         status: "error",
@@ -486,8 +523,8 @@ window.initCrmLogic = function initCrmLogic() {
     activityTypeInput.value = "";
     activityDescriptionInput.value = "";
     closeDropdown(activityDropdown);
-    loadLeadInfo();
-    updateLeadDetails();
+
+    reloadCrmData();
   });
 
   cancelActivityBtn.addEventListener("click", () => {
@@ -518,7 +555,6 @@ window.initCrmLogic = function initCrmLogic() {
       url: "/api/crm/note",
       button: saveNoteBtn,
     });
-    console.log(response);
     if (!response.success) {
       showMessage({
         status: "error",

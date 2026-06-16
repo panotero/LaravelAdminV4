@@ -274,7 +274,7 @@
                     </button>
                 </div>
             </div>
-            <div class="md:col-span-2 flex flex-col gap-5 md:border-r border-zinc-300  relative">
+            <div class="md:col-span-2 flex flex-col gap-5 md:border-r border-zinc-300  relative ">
 
                 <div class="absolute top-0 right-0 p-2">
 
@@ -286,7 +286,7 @@
                             <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"></path>
                         </svg></button>
                 </div>
-                <div class="flex flex-col gap-3  p-5 ">
+                <div class="flex flex-col gap-2  p-5 ">
 
                     <div>
                         <p class="text-xs font-semibold text-zinc-500">Name</p>
@@ -318,6 +318,43 @@
                     </div>
 
                 </div>
+                <div class="p-5">
+                    <p class="text-xs font-semibold text-zinc-500">Proposals</p>
+                    <div id="proposalContainer"
+                        class="border border-zinc-300 rounded-lg flex flex-col max-h-[20vh] overflow-auto p-1 gap-1">
+                        <div
+                            class="dark:bg-zinc-600 border border-zinc-300 rounded-md  p-1 w-full flex justify-between items-center">
+                            <div class="flex flex-col">
+
+                                <h1>proposal 1 </h1>
+                                <p class="text-xs dark:text-zinc-300">date time</p>
+                            </div>
+                            <button class="bg-orange-600 text-white rounded-md p-1"><svg
+                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="1.5" stroke="currentColor" width="24" height="24">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M7.5 10.5l4.5 4.5m0 0l4.5-4.5m-4.5 4.5V3" />
+                                </svg></button>
+                        </div>
+                        <div
+                            class="dark:bg-zinc-600 border border-zinc-300 rounded-md  p-1 w-full flex justify-between items-center">
+                            <div class="flex flex-col">
+
+                                <h1>proposal 2 </h1>
+                                <p class="text-xs dark:text-zinc-300">date time</p>
+                            </div>
+                            <button class="bg-orange-600 text-white rounded-md p-1"><svg
+                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="1.5" stroke="currentColor" width="24" height="24">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M7.5 10.5l4.5 4.5m0 0l4.5-4.5m-4.5 4.5V3" />
+                                </svg></button>
+                        </div>
+
+
+                    </div>
+
+                </div>
 
             </div>
             <div class="md:col-span-4 flex flex-col p-5 gap-5">
@@ -333,7 +370,7 @@
                             +</button>
 
                         <div id="activityDropdown"
-                            class="modaldropdown hidden absolute right-0 top-10 w-full bg-white dark:bg-zinc-700 border rounded-md  p-3 z-50 flex flex-col gap-2 shadow-xl shadow-black/10 dark:shadow-gray-200/10">
+                            class="modaldropdown  hidden absolute right-0 top-10 w-full bg-white dark:bg-zinc-700 border rounded-md  p-3 z-50 flex flex-col gap-2 shadow-xl shadow-black/10 dark:shadow-gray-200/10">
 
                             <div>
                                 <p class="text-md">Add New Activity</p>
@@ -376,7 +413,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="flex flex-col-reverse gap-2" id="activityContainer">
+                    <div class="flex flex-col gap-2  p-1 max-h-[30vh] overflow-auto" id="activityContainer">
 
                         <div class="w-full p-2 rounded-md text-center">
                             <p class="font-semibold text-zinc-400">Theres no activities found</p>
@@ -416,7 +453,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="flex flex-col-reverse gap-2" id="noteContainer">
+                    <div class="flex flex-col gap-2  p-1 max-h-[30vh] overflow-auto" id="noteContainer">
 
                         <div class="w-full p-2 rounded-md text-center">
                             <p class="font-semibold text-zinc-400">Theres no notes found</p>

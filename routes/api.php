@@ -19,6 +19,8 @@ use App\Http\Controllers\CrmLeadController;
 use App\Http\Controllers\CrmStatusController;
 use App\Http\Controllers\CrmActivityController;
 use App\Http\Controllers\CrmNoteController;
+use App\Http\Controllers\ProposalController;
+use App\Http\Controllers\LovController;
 
 /*
 |--------------------------------------------------------------------------
@@ -155,6 +157,16 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/activity', [CrmActivityController::class, 'store']);
     });
 
+
+    Route::prefix('proposal')->group(function () {
+        Route::post('/', [ProposalController::class, 'store']);
+    });
+    Route::prefix('listofval')->group(function () {
+        Route::get('/route', [LovController::class, 'route']);
+        Route::get('/service', [LovController::class, 'service']);
+        Route::get('/vantype', [LovController::class, 'vantype']);
+        Route::get('/vansize', [LovController::class, 'vansize']);
+    });
 
 
     Route::get('/roles', fn() => DB::table('setting_role')->get());

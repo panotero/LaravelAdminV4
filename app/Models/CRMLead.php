@@ -30,17 +30,17 @@ class CRMLead extends Model
 
     public function company()
     {
-        return $this->hasOne(CompanyInfo::class, 'lead_id');
+        return $this->hasOne(CrmCompanyInfo::class, 'lead_id', 'id');
     }
 
     public function notes()
     {
-        return $this->hasMany(CrmNote::class, 'lead_id');
+        return $this->hasMany(CrmNote::class, 'lead_id')->orderBy('created_at', 'desc');
     }
 
     public function activities()
     {
-        return $this->hasMany(CrmActivity::class, 'lead_id');
+        return $this->hasMany(CrmActivity::class, 'lead_id')->orderBy('created_at', 'desc');
     }
     public function status()
     {
@@ -49,5 +49,10 @@ class CRMLead extends Model
     public function user()
     {
         return $this->hasOne(User::class, 'id', 'assigned_to');
+    }
+
+    public function proposals()
+    {
+        return $this->hasMany(Proposal::class,  'lead_id');
     }
 }

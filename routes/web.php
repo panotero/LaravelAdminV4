@@ -9,6 +9,7 @@ use App\Http\Controllers\PageController;
 use App\Http\Controllers\MailerController;
 use App\Http\Middleware\CheckUserStatus;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ProposalController;
 
 /*
 |--------------------------------------------------------------------------
@@ -72,6 +73,8 @@ Route::middleware(['auth', 'check.status', 'prevent-back-history'])->group(funct
     Route::get('/page_mailer', [PageController::class, 'page_Mailer']);
     Route::post('/mailer_save', [MailerController::class, 'save'])->name('mailer_save');
     Route::post('/mailer/send', [MailerController::class, 'send'])->name('mailer.send');
+
+    Route::get('/createpdf/{id}', [ProposalController::class, 'createPdf']);
 
 
     Route::resource('users', UserController::class)->middleware('can:isSuperAdmin');

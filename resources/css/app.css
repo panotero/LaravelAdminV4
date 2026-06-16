@@ -13,3 +13,51 @@
   transform: translateZ(0);
   will-change: transform;
 }
+
+@layer base {
+  /* =========================
+     BASE SCROLLBAR
+  ========================= */
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  /* Transparent background */
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  /* Rounded thumb (light mode default) */
+  ::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.6); /* gray-400 with opacity */
+    border-radius: 999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(107, 114, 128, 0.8); /* gray-500 */
+  }
+
+  /* Firefox */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(156, 163, 175, 0.6) transparent;
+  }
+
+  /* =========================
+     DARK MODE
+  ========================= */
+
+  .dark ::-webkit-scrollbar-thumb {
+    background: rgba(75, 85, 99, 0.7); /* gray-600 */
+  }
+
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: rgba(107, 114, 128, 0.9); /* gray-500 */
+  }
+
+  .dark * {
+    scrollbar-color: rgba(75, 85, 99, 0.7) transparent;
+  }
+}

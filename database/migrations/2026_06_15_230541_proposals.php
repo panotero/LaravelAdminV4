@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('proposals', function (Blueprint  $table) {
             $table->id();
+            $table->uuid('uuid')->unique();
+            $table->string('code');
 
             $table->foreignId('lead_id')
                 ->constrained('crm_leads')
@@ -22,7 +24,7 @@ return new class extends Migration
                 ->nullable()
                 ->constrained('users')
                 ->nullOnDelete();
-            $table->integer('status');
+            $table->integer('status')->default(0);
 
             $table->timestamps();
         });

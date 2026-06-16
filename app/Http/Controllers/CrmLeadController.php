@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\CrmLead;
-use App\Models\CompanyInfo;
+use App\Models\CrmCompanyInfo;
 use App\Models\CrmNote;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -34,7 +34,7 @@ class CrmLeadController extends Controller
                 'status_updated_at' => now(),
             ]);
 
-            CompanyInfo::create([
+            CrmCompanyInfo::create([
                 'lead_id' => $lead->id,
                 'company_name' => $request->company_name,
                 'position' => $request->position ?? null,
@@ -67,6 +67,7 @@ class CrmLeadController extends Controller
     public function index()
     {
         return CrmLead::select(
+            'id',
             'uuid',
             'contact_name',
             'email',
@@ -79,7 +80,7 @@ class CrmLeadController extends Controller
             ->with([
                 'company:id,lead_id,company_name',
                 'status:id,status',
-                'user:id,name'
+                'user:id,name',
             ])
             ->orderBy('updated_at', 'desc')
             ->get();
@@ -88,7 +89,14 @@ class CrmLeadController extends Controller
     public function show($uuid)
     {
 
-        $lead = CrmLead::with('company', 'notes.user', 'activities.user', 'status:id,status', 'user')->where('uuid', $uuid)->firstOrFail();
+        $lead = CrmLead::with(
+            'company',
+            'notes.user',
+            'activities.user',
+            'status:id,status',
+            'user',
+            'proposals'
+        )->where('uuid', $uuid)->firstOrFail();
 
         return response()->json([
 
