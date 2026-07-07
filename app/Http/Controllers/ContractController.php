@@ -16,11 +16,62 @@ class ContractController extends Controller
         $contracts = Contract::query()
             ->with(['proposal:id,code', 'lead'])
             ->when($request->filled('lead_id'), fn($q) => $q->where('lead_id', $request->lead_id))
-            ->when($request->filled('status'), fn($q) => $q->where('status', $request->status))
-            ->latest('id')
-            ->paginate($request->get('per_page', 15));
 
-        return response()->json(['success' => true, 'data' => $contracts]);
+            ->when($request->filled('status'), function ($q) use ($request) {
+
+                switch (strtolower($request->status)) {
+
+                    case 'active':
+                        $q->where('status', Contract::STATUS_ACTIVE);
+                        break;
+
+                    case 'expired':
+                        $q->where('status', Contract::STATUS_EXPIRED);
+                        break;
+
+                    case 'terminated':
+                        $q->where('status', Contract::STATUS_TERMINATED);
+                        break;
+
+                    case 'expiring':
+                        $q->where('status', Contract::STATUS_ACTIVE)
+                            ->whereDate('valid_to', '>=', Carbon::today())
+                            ->whereDate('valid_to', '<=', Carbon::today()->addMonth());
+                        break;
+
+                    case 'all':
+                    default:
+                        // No filtering
+                        break;
+                }
+            })
+
+            ->latest('id')
+            ->paginate($request->get('per_page', 15))
+            ->appends($request->query());
+
+        $allContracts = Contract::all();
+
+        $statusCounts = $allContracts
+            ->groupBy('status')
+            ->map(fn($group) => $group->count());
+
+        $expiring = Contract::whereDate('valid_to', '>=', Carbon::today())
+            ->whereDate('valid_to', '<=', Carbon::today()->addMonth())
+            ->count();
+
+        return response()->json([
+            'success' => true,
+            'data' => $contracts,
+            'status_counts' => [
+                'all' => $allContracts->count(),
+                'draft' => $statusCounts->get(Contract::STATUS_DRAFT, 0),
+                'active' => $statusCounts->get(Contract::STATUS_ACTIVE, 0),
+                'expired' => $statusCounts->get(Contract::STATUS_EXPIRED, 0),
+                'terminated' => $statusCounts->get(Contract::STATUS_TERMINATED, 0),
+                'expiring' => $expiring,
+            ],
+        ]);
     }
 
     public function show(Contract $contract)

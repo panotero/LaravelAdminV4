@@ -29,18 +29,41 @@ class ProposalController extends Controller
         $this->activityService = $activityService;
     }
     //
-    public function index()
+    public function index(Request $request)
     {
-        $proposals = Proposal::select(
-            'id',
-            'code',
-            'lead_id',
-            'created_by',
-            'status',
-            'created_at',
-            'updated_at'
-        )->with('lead:id,contact_name', 'lead.company:id,lead_id,company_name', 'rates', 'creator:id,name', 'status:id,status')
-            ->orderBy('updated_at', 'desc')->get();
+        $proposals = Proposal::query()
+            ->select(
+                'id',
+                'code',
+                'lead_id',
+                'created_by',
+                'status',
+                'created_at',
+                'updated_at'
+            )
+            ->with(
+                'lead:id,contact_name',
+                'lead.company:id,lead_id,company_name',
+                'rates',
+                'creator:id,name',
+                'status:id,status'
+            )
+            ->when($request->filled('search'), function ($q) use ($request) {
+                $search = $request->search;
+
+                $q->where(function ($q) use ($search) {
+                    $q->where('code', 'like', "%{$search}%")
+                        ->orWhereHas('lead', function ($q) use ($search) {
+                            $q->where('contact_name', 'like', "%{$search}%")
+                                ->orWhereHas('company', function ($q) use ($search) {
+                                    $q->where('company_name', 'like', "%{$search}%");
+                                });
+                        });
+                });
+            })
+            ->orderByDesc('updated_at')
+            ->paginate($request->get('per_page', 25));
+
         return response()->json([
             'success' => true,
             'data' => $proposals,
@@ -117,6 +140,7 @@ class ProposalController extends Controller
             //if there is a record get the proposal id and create additional porposal rates with the proposal id
             $proposalRatePayload = [
                 'proposal_id' => $proposal->id,
+                'rate_type' =>  $request->rate_type,
                 'proposed_rate' => str_replace(',', '', $request->proposed_rate),
                 'route_from' => $request->route_from,
                 'route_to' => $request->route_to,

@@ -12,26 +12,8 @@
         </button>
 
     </div>
-    <x-table-container>
-        <table id="proposalTable" class="w-full">
-            <thead>
-                <tr>
-                    <th>Code</th>
-                    <th>Company</th>
-                    <th>Contact Name</th>
-                    <th>Proposed </th>
-                    <th>Status</th>
-                    <th>Proposed By</th>
-                    <th>Created</th>
-                </tr>
-            </thead>
+    <x-table id="tableProposal" />
 
-            <tbody id="proposalTableBody">
-
-            </tbody>
-
-        </table>
-    </x-table-container>
 </div>
 
 <x-new-proposal-modal />
@@ -40,7 +22,10 @@
 
 
 <script>
-    (function() { // ============================================================
+    (function() {
+
+        renderTable().load(1);
+        // ============================================================
         // CONSTANTS & STATE
         // ============================================================
 
@@ -89,62 +74,6 @@
             });
         });
 
-        RenderProposalTable();
-
-        // ============================================================
-        // PROPOSAL TABLE
-        // ============================================================
-
-        async function RenderProposalTable() {
-
-            const table = document.getElementById("proposalTable");
-            const tbody = table.querySelector("tbody");
-
-            tbody.innerHTML = initLoading();
-
-            const proposals = await apiCall({
-                mode: "GET",
-                url: "/api/proposal",
-            });
-
-            if (!proposals.success) {
-                showMessage({
-                    status: "error",
-                    title: "Error Fetching Proposals",
-                    message: "There is an error fetching your information. Please contact the system administrator.",
-                });
-                return;
-            }
-
-            tbody.innerHTML = proposals.data.map(row => `
-        <tr class="rowclick cursor-pointer hover:bg-zinc-100"
-            data-proposal-code="${row.code}">
-            <td>${row.code}</td>
-            <td>${row.lead.company.company_name}</td>
-            <td>${row.lead.contact_name}</td>
-            <td>${row.rates.length}</td>
-            <td>
-                <span class="px-3 py-1 text-xs font-semibold rounded-full ${getStatusBadgeClass(row.status)}">
-                    ${row.status?.status ?? "UNKNOWN"}
-                </span>
-            </td>
-            <td>${row.creator.name}</td>
-            <td>${formatDateTime(row.created_at)}</td>
-        </tr>
-    `).join("");
-
-            initDataTables(10);
-
-            table.querySelectorAll("tbody tr").forEach(row => {
-                row.addEventListener("click", function() {
-                    proposalCode = row.dataset.proposalCode;
-                    loadProposalInfo(proposalCode);
-                    initModal({
-                        modalId: "proposalModal"
-                    });
-                });
-            });
-        }
 
         // ============================================================
         // LOAD PROPOSAL INFO
@@ -156,6 +85,7 @@
                 mode: "GET",
                 url: `/api/proposal/${code}`,
             });
+            console.log(response);
 
             if (!response.success) {
                 showMessage({
@@ -339,7 +269,6 @@
         async function handleStatusUpdate(status) {
             await updateProposalStatus(proposalCode, status, null);
             await loadProposalInfo(proposalCode);
-            await RenderProposalTable();
         }
 
         approveBtn.addEventListener("click", () => handleStatusUpdate(STATUS.APPROVED));
@@ -353,5 +282,61 @@
             const proposalCode = this.dataset.proposalCode;
             window.openCreateContractModal(proposalCode);
         });
+
+
+
+        function renderTable() {
+            const thead = [{
+                    title: "Code",
+                    key: "code",
+                },
+                {
+                    title: "Company",
+                    key: "lead.company.company_name",
+                },
+                {
+                    title: "Contact Name",
+                    key: "lead.contact_name",
+                },
+                {
+                    title: "Proposed",
+                    key: "rates",
+                    render: (row) => row.rates.length,
+                },
+                {
+                    title: "Status",
+                    key: "status.status",
+                },
+                {
+                    title: "Proposed By",
+                    key: "creator.name",
+                },
+                {
+                    title: "Created",
+                    key: "created_at",
+                    render: (row) => formatDateTime(row.created_at),
+                },
+            ];
+
+            const table = renderRemoteTable({
+                url: "/api/proposal",
+                tableId: "tableProposal",
+                afterRenderFunction: handleClick,
+                thead: thead,
+            });
+
+            function handleClick(row) {
+                row.addEventListener("click", async function() {
+                    console.log(JSON.parse(row.dataset.row).code);
+                    await loadProposalInfo(JSON.parse(row.dataset.row).code);
+
+                    initModal({
+                        modalId: "proposalModal",
+                    });
+                });
+            }
+            return table;
+        }
+
     })();
 </script>

@@ -16,13 +16,11 @@ class HandlingFeeController extends Controller
         $fees = HandlingFee::query()
             ->with('port:port_id,code,name')
             ->when($request->filled('port_id'), fn($q) => $q->where('port_id', $request->port_id))
+            ->when($request->filled('search'), fn($q) => $q->whereHas('port', fn($q) => $q->where('code', 'like', "%{$request->search}%")))
             ->orderByDesc('effective_date')
             ->paginate($request->get('per_page', 25));
 
-        return response()->json([
-            'success' => true,
-            'data' => $fees,
-        ]);
+        return response()->json(['success' => true, 'data' => $fees]);
     }
 
     public function store(Request $request)

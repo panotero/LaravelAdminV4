@@ -40,12 +40,12 @@ class PortSeeder extends Seeder
         ];
 
         // Generate ports until there are 200
-        // for ($i = count($ports) + 1; $i <= 200; $i++) {
-        //     $ports[] = [
-        //         'code' => sprintf('P%03d', $i),   // P023, P024 ... P200
-        //         'name' => 'PORT ' . $i,
-        //     ];
-        // }
+        for ($i = count($ports) + 1; $i <= 200; $i++) {
+            $ports[] = [
+                'code' => sprintf('P%03d', $i),   // P023, P024 ... P200
+                'name' => 'PORT ' . $i,
+            ];
+        }
 
         foreach ($ports as $port) {
             Port::updateOrCreate(

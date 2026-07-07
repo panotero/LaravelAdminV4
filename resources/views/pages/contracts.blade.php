@@ -20,35 +20,35 @@
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
 
             <div class="contractStatusBtn max-md:col-span-2 bg-white border border-zinc-200 rounded-xl p-4 shadow-sm cursor-pointer ring-2 ring-blue-500"
-                data-status="">
+                data-status="all">
                 <div class="w-full py-1 rounded-full bg-blue-500"></div>
                 <p class="text-xs text-zinc-400 font-semibold mt-2">ALL</p>
                 <p class="text-2xl font-bold text-black" id="countAll">0</p>
             </div>
 
             <div class="contractStatusBtn bg-white border border-zinc-200 rounded-xl p-4 shadow-sm cursor-pointer"
-                data-status="1">
+                data-status="active">
                 <div class="w-full py-1 rounded-full bg-green-500"></div>
                 <p class="text-xs text-zinc-400 font-semibold mt-2">ACTIVE</p>
                 <p class="text-2xl font-bold text-black" id="countActive">0</p>
             </div>
 
             <div class="contractStatusBtn bg-white border border-zinc-200 rounded-xl p-4 shadow-sm cursor-pointer"
-                data-status="2">
+                data-status="expiring">
                 <div class="w-full py-1 rounded-full bg-amber-500"></div>
                 <p class="text-xs text-zinc-400 font-semibold mt-2">EXPIRING</p>
                 <p class="text-2xl font-bold text-black" id="countExpiring">0</p>
             </div>
 
             <div class="contractStatusBtn bg-white border border-zinc-200 rounded-xl p-4 shadow-sm cursor-pointer"
-                data-status="3">
+                data-status="expired">
                 <div class="w-full py-1 rounded-full bg-red-500"></div>
                 <p class="text-xs text-zinc-400 font-semibold mt-2">EXPIRED</p>
                 <p class="text-2xl font-bold text-black" id="countExpired">0</p>
             </div>
 
             <div class="contractStatusBtn bg-white border border-zinc-200 rounded-xl p-4 shadow-sm cursor-pointer"
-                data-status="4">
+                data-status="terminated">
                 <div class="w-full py-1 rounded-full bg-zinc-500"></div>
                 <p class="text-xs text-zinc-400 font-semibold mt-2">CANCELLED</p>
                 <p class="text-2xl font-bold text-black" id="countCancelled">0</p>
@@ -57,40 +57,10 @@
         </div>
     </section>
 
-    {{-- Filters --}}
-    <div class="flex flex-wrap gap-3 mb-4">
-        <select id="contractStatusFilter"
-            class="rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-orange-500 focus:ring-orange-500">
-            <option value="">All Statuses</option>
-            <option value="1">Draft</option>
-            <option value="2">Active</option>
-            <option value="3">Expired</option>
-            <option value="4">Terminated</option>
-        </select>
-    </div>
 
-    <div class="bg-white border border-zinc-200 rounded-lg overflow-hidden">
-        <table class="min-w-full divide-y divide-zinc-200 text-sm">
-            <thead class="bg-zinc-50">
-                <tr>
-                    <th class="px-4 py-2.5 text-left text-xs font-medium text-zinc-500 uppercase tracking-wide">Code
-                    </th>
-                    <th class="px-4 py-2.5 text-left text-xs font-medium text-zinc-500 uppercase tracking-wide">Client
-                    </th>
-                    <th class="px-4 py-2.5 text-left text-xs font-medium text-zinc-500 uppercase tracking-wide">Proposal
-                    </th>
-                    <th class="px-4 py-2.5 text-left text-xs font-medium text-zinc-500 uppercase tracking-wide">Valid
-                        From</th>
-                    <th class="px-4 py-2.5 text-left text-xs font-medium text-zinc-500 uppercase tracking-wide">Valid To
-                    </th>
-                    <th class="px-4 py-2.5 text-left text-xs font-medium text-zinc-500 uppercase tracking-wide">Status
-                    </th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-zinc-100" id="contractsTableBody"></tbody>
-        </table>
-    </div>
+    <x-table id="tableContracts" />
 </div>
+
 
 {{-- View Contract slide-over (read-only) --}}
 <x-side-modal id="viewContractModal">
@@ -158,42 +128,77 @@
         // -----------------------------------------------------------------
         async function loadContracts() {
 
-            const body = document.getElementById('contractsTableBody');
-            if (!body) return;
-
-            const status = document.getElementById('contractStatusFilter').value;
-            const url = status ? `/api/contracts?status=${status}` : '/api/contracts';
-
             const response = await apiCall({
                 mode: 'GET',
-                url
+                url: '/api/contracts',
+            });
+            updateContractCounts(response.status_counts);
+            renderTable().load(1);
+
+        }
+
+        s
+
+        function renderTable() {
+            const thead = [{
+                    title: "Code",
+                    key: "code",
+                },
+                {
+                    title: "Client",
+                    key: "lead.contact_name",
+                },
+                {
+                    title: "Proposal",
+                    key: "proposal.code",
+                },
+                {
+                    title: "Valid From",
+                    key: "valid_from",
+                },
+                {
+                    title: "Valid To",
+                    key: "valid_to",
+                },
+                {
+                    title: "Status",
+                    key: "status",
+                },
+            ];
+
+            const table = renderRemoteTable({
+                url: '/api/contracts',
+                tableId: "tableContracts",
+                afterRenderFunction: handleClick,
+                thead: thead,
             });
 
-            if (!response.success) {
-                showMessage({
-                    status: 'error',
-                    title: 'Error',
-                    message: 'Unable to load contracts. Please contact the system administrator.',
-                });
-                return;
-            }
 
-            const contracts = rows(response);
+            return table;
+        }
 
-            updateContractCounts(contracts);
-            console.log(contracts);
-            let html = "";
-            contracts.forEach(contract => {
-                html += buildContractRow(contract);
-
-            });
-            body.innerHTML = html;
-            initDataTables(10);
-
-            body.querySelectorAll('[data-view-id]').forEach((btn) => {
-                btn.addEventListener('click', () => openViewContract(btn.dataset.viewId));
+        function handleClick(row) {
+            row.addEventListener("click", async function() {
+                const data = JSON.parse(row.dataset.row);
+                console.log(data);
+                // Your code here
+                openViewContract(data.id);
             });
         }
+
+        document.querySelectorAll(".contractStatusBtn").forEach((btn) => {
+            btn.addEventListener("click", function() {
+                document
+                    .querySelectorAll(".contractStatusBtn")
+                    .forEach((card) => card.classList.remove("ring-2", "ring-orange-500"));
+
+                this.classList.add("ring-2", "ring-orange-500");
+
+                const status = this.dataset.status;
+
+                renderTable().setFilter("status", status);
+            });
+        });
 
         function buildContractRow(contract) {
             return `
@@ -273,9 +278,6 @@
         function init() {
             loadContracts();
 
-            document.getElementById('contractStatusFilter').addEventListener('change', function() {
-                loadContracts();
-            });
 
             // Opens the standalone modal from create-contract-modal.js -
             // this page has no idea how that modal works internally.
@@ -292,38 +294,15 @@
 
         init();
 
-        function updateContractCounts(contracts) {
+        function updateContractCounts(counts) {
 
-            const counts = {
-                all: contracts.length,
-                active: 0,
-                expiring: 0,
-                expired: 0,
-                cancelled: 0,
-            };
 
-            contracts.forEach((contract) => {
-                switch (Number(contract.status)) {
-                    case 1:
-                        counts.active++;
-                        break;
-                    case 2:
-                        counts.expiring++;
-                        break;
-                    case 3:
-                        counts.expired++;
-                        break;
-                    case 4:
-                        counts.cancelled++;
-                        break;
-                }
-            });
 
             document.getElementById("countAll").textContent = counts.all;
             document.getElementById("countActive").textContent = counts.active;
-            document.getElementById("countExpiring").textContent = counts.expiring;
+            document.getElementById("countExpiring").textContent = counts?.expiring ?? 0;
             document.getElementById("countExpired").textContent = counts.expired;
-            document.getElementById("countCancelled").textContent = counts.cancelled;
+            document.getElementById("countCancelled").textContent = counts.terminated;
         }
     })();
 </script>

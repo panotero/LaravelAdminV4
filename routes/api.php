@@ -173,8 +173,5 @@ Route::middleware(['auth'])->group(function () {
     });
 
 
-    require __DIR__ . '/api_booking.php';
     require __DIR__ . '/api_maintenance.php';
-    require __DIR__ . '/api_master.php';
-    require __DIR__ . '/api_contracts.php';
 });

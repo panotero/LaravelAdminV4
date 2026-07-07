@@ -44,11 +44,39 @@
                         class=" w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-800 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition">
                 </div>
 
-                <!-- Rate -->
-                <div class="flex flex-col gap-1 col-span-2">
-                    <label class="text-[11px] font-medium text-zinc-400 uppercase tracking-widest">Rate</label>
-                    <input type="text" name="proposed_rate"
-                        class="format-currency w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-800 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition">
+                <!-- Rate --><!-- Rate Type -->
+                <div class="flex flex-col gap-2 col-span-2">
+                    <label class="text-[11px] font-medium text-zinc-400 uppercase tracking-widest">
+                        Rate Type
+                    </label>
+
+                    <div
+                        class="bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg p-3 flex flex-col sm:flex-row gap-4">
+
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="rate_type" value="fixed" checked
+                                class="text-orange-500 focus:ring-orange-500">
+                            <span class="text-sm text-zinc-700 dark:text-zinc-200">
+                                Fixed Amount
+                            </span>
+                        </label>
+
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="rate_type" value="percentage"
+                                class="text-orange-500 focus:ring-orange-500">
+                            <span class="text-sm text-zinc-700 dark:text-zinc-200">
+                                Percentage (%)
+                            </span>
+                        </label>
+
+                        <label class="text-[11px] font-medium text-zinc-400 uppercase tracking-widest">Rate
+                            <input type="text" name="proposed_rate"
+                                class="format-currency w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-800 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition">
+                        </label>
+
+                    </div>
+                    <div class="flex flex-col gap-1 col-span-2">
+                    </div>
                 </div>
 
                 <!-- Service Mode -->
@@ -149,11 +177,16 @@
         //onclick function
         document.getElementById("saveProposalBtn").addEventListener("click", async function() {
             if (!this) return;
+            const modal = document.getElementById("generateProposal");
             const proposalForm = document.getElementById("proposalForm");
             const formData = new FormData(proposalForm);
+            for (const [key, value] of formData.entries()) {
+                console.log(key, value);
+            }
 
             const data = Object.fromEntries(formData.entries());
-            data.uuid = window.uuid;
+
+            data.uuid = modal.dataset.leadUuid
             const response = await apiCall({
                 mode: "POST",
                 isJson: true,

@@ -13,6 +13,7 @@ class ProposalInfo extends Model
 
     protected $fillable = [
         'proposal_id',
+        'rate_type',
         'proposed_rate',
         'route_from',
         'route_to',

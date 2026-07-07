@@ -42,7 +42,7 @@ class CrmLead extends Model
     {
         return $this->hasMany(CrmActivity::class, 'lead_id')->orderBy('created_at', 'desc');
     }
-    public function status()
+    public function crmStatus()
     {
         return $this->hasOne(CrmStatus::class, 'id', 'status');
     }

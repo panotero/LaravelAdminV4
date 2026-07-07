@@ -14,6 +14,77 @@ use Illuminate\Support\Str;
 class CrmLeadController extends Controller
 {
     //
+    public function index(Request $request)
+    {
+        $leads = CrmLead::query()
+            ->select(
+                'id',
+                'uuid',
+                'contact_name',
+                'email',
+                'mobile',
+                'status',
+                'assigned_to',
+                'created_at',
+                'updated_at'
+            )
+            ->with([
+                'company:id,lead_id,company_name',
+                'crmStatus:id,status',
+                'user:id,name',
+            ])
+
+            // Search
+            ->when($request->filled('search'), function ($q) use ($request) {
+                $search = $request->search;
+
+                $q->where(function ($q) use ($search) {
+                    $q->where('contact_name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%")
+                        ->orWhere('mobile', 'like', "%{$search}%")
+                        ->orWhereHas('company', function ($q) use ($search) {
+                            $q->where('company_name', 'like', "%{$search}%");
+                        })
+                        ->orWhereHas('crmStatus', function ($q) use ($search) {
+                            $q->where('status', 'like', "%{$search}%");
+                        });
+                });
+            })
+
+            // Status filter
+            ->when(
+                $request->filled('status') && strtoupper($request->status) !== 'ALL',
+                function ($q) use ($request) {
+                    $q->whereHas('crmStatus', function ($q) use ($request) {
+                        $q->where('status', strtoupper($request->status));
+                    });
+                }
+            )
+
+            ->orderByDesc('updated_at')
+            ->paginate($request->get('per_page', 25))
+            ->appends($request->query());
+
+        $allLeads = CrmLead::with('crmStatus')->get();
+
+        $statusCounts = $allLeads
+            ->groupBy(fn($lead) => optional($lead->crmStatus)->status)
+            ->map(fn($group) => $group->count());
+
+        return response()->json([
+            'success' => true,
+            'data' => $leads,
+            'status_counts' => [
+                'ALL' => $allLeads->count(),
+                'LEAD' => $statusCounts->get('LEAD', 0),
+                'QUALIFIED' => $statusCounts->get('QUALIFIED', 0),
+                'OPPORTUNITY' => $statusCounts->get('OPPORTUNITY', 0),
+                'NEGOTIATION' => $statusCounts->get('NEGOTIATION', 0),
+                'WIN' => $statusCounts->get('WIN', 0),
+                'LOST' => $statusCounts->get('LOST', 0),
+            ],
+        ]);
+    }
 
     public function store(Request $request)
     {
@@ -67,28 +138,6 @@ class CrmLeadController extends Controller
         }
     }
 
-    public function index()
-    {
-        return CrmLead::select(
-            'id',
-            'uuid',
-            'contact_name',
-            'email',
-            'mobile',
-            'status',
-            'assigned_to',
-            'created_at',
-            'updated_at'
-        )
-            ->with([
-                'company:id,lead_id,company_name',
-                'status:id,status',
-                'user:id,name',
-            ])
-            ->orderBy('updated_at', 'desc')
-            ->get();
-    }
-
     public function show($uuid)
     {
 
@@ -96,7 +145,7 @@ class CrmLeadController extends Controller
             'company',
             'notes.user',
             'activities.user',
-            'status:id,status',
+            'crmStatus:id,status',
             'user',
             'proposals.status'
         )->where('uuid', $uuid)->firstOrFail();

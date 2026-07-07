@@ -16,10 +16,7 @@ class ServiceableAreaController extends Controller
             ->orderBy('area_name')
             ->paginate($request->get('per_page', 25));
 
-        return response()->json([
-            'success' => true,
-            'data' => $areas,
-        ]);
+        return response()->json(['success' => true, 'data' => $areas]);
     }
 
     public function store(Request $request)

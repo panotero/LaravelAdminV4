@@ -25,16 +25,6 @@ window.initCrmLogic = function initCrmLogic() {
     APPROVED: 2,
   };
 
-  const COUNT_MAP = {
-    ALL: "countALL",
-    LEAD: "countLead",
-    QUALIFIED: "countQualified",
-    OPPORTUNITY: "countOpportunity",
-    NEGOTIATION: "countNegotiation",
-    WIN: "countWin",
-    LOST: "countLose",
-  };
-
   // ============================================================
   // DOM REFS
   // ============================================================
@@ -87,12 +77,11 @@ window.initCrmLogic = function initCrmLogic() {
   // API
   // ============================================================
 
-  async function getLeads() {
+  async function getleadcount() {
     const leads = await apiCall({
       mode: "GET",
       url: "/api/crm/leads",
     });
-    leadsArray = leads;
     return leads;
   }
 
@@ -116,54 +105,91 @@ window.initCrmLogic = function initCrmLogic() {
   // RENDER — TABLE
   // ============================================================
 
-  function renderTable(leads) {
-    document.getElementById("crmTableBody").innerHTML = initLoading();
+  function renderTable() {
+    const thead = [
+      {
+        title: "Contact",
+        key: "contact_name",
+      },
+      {
+        title: "Company",
+        key: "company.company_name",
+      },
+      {
+        title: "Email",
+        key: "email",
+      },
+      {
+        title: "Mobile",
+        key: "mobile",
+      },
+      {
+        title: "Status",
+        key: "crm_status.status",
+      },
+      {
+        title: "Assigned To",
+        key: "user.name",
+      },
+      {
+        title: "Created",
+        key: "created_at",
+        render: (row) => formatDateTime(row.created_at),
+      },
+    ];
+    const table = renderRemoteTable({
+      url: "/api/crm/leads",
+      tableId: "tableCrm",
+      afterRenderFunction: handleClick,
+      thead: thead,
+    });
 
-    const html = leads
-      .map((row) => {
-        const status = row.status?.status ?? "UNKNOWN";
-        const statusClass = getStatusBadgeClass(status);
+    function handleClick(row) {
+      row.addEventListener("click", function () {
+        loadLeadInfo(JSON.parse(row.dataset.row).uuid);
+        initModal({ modalId: "LeadInfoModal" });
+      });
+    }
 
-        return `
-                <tr class="cursor-pointer hover:bg-zinc-100" data-uuid="${row.uuid}">
-                    <td>${row.contact_name}</td>
-                    <td>${row.company?.company_name ?? "No Company"}</td>
-                    <td>${row.email}</td>
-                    <td>${row.mobile}</td>
-                    <td>
-                        <span class="px-3 py-1 text-xs font-semibold rounded-full ${statusClass}">
-                            ${status}
-                        </span>
-                    </td>
-                    <td>${row.user.name}</td>
-                    <td>${formatDateTime(row.created_at)}</td>
-                </tr>`;
-      })
-      .join("");
-
-    $("#crmTableBody").html(html);
-    initDataTables(10);
+    return table;
   }
+
+  document.querySelectorAll(".statusBtn").forEach((btn) => {
+    btn.addEventListener("click", function () {
+      document
+        .querySelectorAll(".statusBtn")
+        .forEach((card) => card.classList.remove("ring-2", "ring-orange-500"));
+
+      this.classList.add("ring-2", "ring-orange-500");
+
+      const status = this.dataset.status;
+
+      renderTable().setFilter("status", status);
+    });
+  });
 
   // ============================================================
   // RENDER — COUNTS
   // ============================================================
 
-  function renderCounts(leads) {
-    const counts = {
-      ALL: leads.length,
-      LEAD: 0,
-      QUALIFIED: 0,
-      OPPORTUNITY: 0,
-      NEGOTIATION: 0,
-      WIN: 0,
-      LOST: 0,
+  async function renderCounts() {
+    const lead = await getleadcount();
+    const counts = lead.status_counts;
+
+    const COUNT_MAP = {
+      ALL: "countALL",
+      LEAD: "countLead",
+      QUALIFIED: "countQualified",
+      OPPORTUNITY: "countOpportunity",
+      NEGOTIATION: "countNegotiation",
+      WIN: "countWin",
+      LOST: "countLose",
     };
 
-    leads.forEach((row) => {
-      const status = row.status.status;
-      if (counts.hasOwnProperty(status)) counts[status]++;
-    });
+    // leads.forEach((row) => {
+    //   const status = row.status.status;
+    //   if (counts.hasOwnProperty(status)) counts[status]++;
+    // });
 
     Object.entries(COUNT_MAP).forEach(([key, elementId]) => {
       const el = document.getElementById(elementId);
@@ -175,7 +201,7 @@ window.initCrmLogic = function initCrmLogic() {
   // RENDER — LEAD INFO
   // ============================================================
 
-  async function loadLeadInfo() {
+  async function loadLeadInfo(uuid) {
     const loader = loadingLine();
     [
       "#leadCompanyName",
@@ -191,10 +217,10 @@ window.initCrmLogic = function initCrmLogic() {
       "#activityContainer",
     ].forEach((id) => $(id).html(loader));
     document.getElementById("proposalContainer").innerHTML = loader;
-
+    leadUUID = uuid;
     const response = await apiCall({
       mode: "GET",
-      url: `/api/crm/leads/${leadUUID}`,
+      url: `/api/crm/leads/${uuid}`,
     });
 
     if (!response.success) {
@@ -215,7 +241,7 @@ window.initCrmLogic = function initCrmLogic() {
     $("#leadCompanyName").html(lead.company.company_name.toUpperCase() ?? "");
     $("#leadStatus").html(`
             <span class="px-3 py-1 text-xs font-semibold rounded-full ${statusClass}">
-                ${lead.status.status}
+                ${lead.crm_status.status}
             </span>`);
     $("#leadContactName").html(lead.contact_name ?? "");
     $("#leadEmail").html(lead.email ?? "");
@@ -409,9 +435,9 @@ window.initCrmLogic = function initCrmLogic() {
 
     showMessage({ status: "success", title: "Lead saved successfully!" });
 
-    const leads = await getLeads();
-    renderTable(leads);
-    renderCounts(leads);
+    console.log(leadcount);
+    renderTable().load(1);
+    renderCounts();
     clearInputs();
     closeSideModal("LeadDetailsSideModal");
   });
@@ -457,17 +483,6 @@ window.initCrmLogic = function initCrmLogic() {
   // STATUS FILTER BUTTONS
   // ============================================================
 
-  document.querySelectorAll(".statusBtn").forEach((btn) => {
-    btn.addEventListener("click", function () {
-      const status = btn.dataset.status;
-      const filtered =
-        status === "ALL"
-          ? leadsArray
-          : leadsArray.filter((row) => row.status.status === status);
-      renderTable(filtered);
-    });
-  });
-
   // ============================================================
   // TABLE ROW CLICK
   // ============================================================
@@ -475,7 +490,6 @@ window.initCrmLogic = function initCrmLogic() {
   $(document).on("click", "#crmTable tbody tr", function () {
     leadUUID = $(this).data("uuid");
     window.uuid = leadUUID;
-    initModal({ modalId: "LeadInfoModal" });
     loadLeadInfo();
   });
 
@@ -644,7 +658,7 @@ window.initCrmLogic = function initCrmLogic() {
   // ============================================================
 
   window.reloadCrmData = function () {
-    loadLeadInfo();
+    loadLeadInfo(leadUUID);
     updateLeadDetails();
   };
 
@@ -653,9 +667,8 @@ window.initCrmLogic = function initCrmLogic() {
   // ============================================================
 
   async function updateLeadDetails() {
-    await getLeads();
-    renderTable(leadsArray);
-    renderCounts(leadsArray);
+    renderTable().load(1);
+    renderCounts();
   }
 
   async function initializePage() {

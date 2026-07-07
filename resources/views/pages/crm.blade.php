@@ -89,26 +89,8 @@
 
         </div>
     </section>
-    <x-table-container>
-        <table id="crmTable" class="w-full">
-            <thead>
-                <tr>
-                    <th>Contact</th>
-                    <th>Company</th>
-                    <th>Email</th>
-                    <th>Mobile</th>
-                    <th>Status</th>
-                    <th>Assigned To</th>
-                    <th>Created</th>
-                </tr>
-            </thead>
 
-            <tbody id="crmTableBody">
-
-            </tbody>
-
-        </table>
-    </x-table-container>
+    <x-table id="tableCrm" />
 
 </div>
 

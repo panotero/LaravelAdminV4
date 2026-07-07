@@ -30,6 +30,9 @@
                 data-tab="laneTariffRates">Lane Tariff Rates</button>
             <button type="button"
                 class="maintenance-tab-btn px-3.5 py-2 text-sm font-medium border-b-2 border-transparent text-zinc-500 hover:text-zinc-800"
+                data-tab="generalCharges">General Charges</button>
+            <button type="button"
+                class="maintenance-tab-btn px-3.5 py-2 text-sm font-medium border-b-2 border-transparent text-zinc-500 hover:text-zinc-800"
                 data-tab="portCharges">Port Charges</button>
             <button type="button"
                 class="maintenance-tab-btn px-3.5 py-2 text-sm font-medium border-b-2 border-transparent text-zinc-500 hover:text-zinc-800"
@@ -52,6 +55,7 @@
         'serviceableAreas' => 'Serviceable Areas',
         'lanes' => 'Lanes',
         'laneTariffRates' => 'Lane Tariff Rates',
+        'generalCharges' => 'General Charges',
         'portCharges' => 'Port Charges',
         'handlingFees' => 'Handling Fees',
         'truckingTariffs' => 'Trucking Tariffs',
@@ -70,6 +74,8 @@
                     </button>
                 </div>
 
+                <x-search-bar :id="$key" placeholder="Search {{ strtolower($label) }}..." />
+
                 <div class="bg-white border border-zinc-200 rounded-lg overflow-hidden">
                     <table class="min-w-full divide-y divide-zinc-200 text-sm">
                         <thead class="bg-zinc-50">
@@ -77,6 +83,7 @@
                         </thead>
                         <tbody class="divide-y divide-zinc-100" data-table-body="{{ $key }}"></tbody>
                     </table>
+                    <x-table-pagination :id="$key" />
                 </div>
             </div>
         @endforeach
@@ -111,6 +118,8 @@
 </x-side-modal>
 
 
+
+
 <script>
     (function() {
         /**
@@ -126,10 +135,14 @@
          * Add a new entity by adding a new config block - no other code
          * changes needed for a plain CRUD list.
          *
-         * ASSUMPTION about apiCall()'s return shape (adjust the two spots
-         * marked "ADJUST ME" below if your actual response shape differs):
+         * Requires public/js/remote-table.js to be loaded first - it supplies
+         * window.createRemoteTable(), which handles fetching, pagination, and
+         * search for every entity's table here. This file only supplies the
+         * row template + rebinds Edit/Delete buttons after each render.
+         *
+         * ASSUMPTION about apiCall()'s return shape (adjust the spot marked
+         * "ADJUST ME" below if your actual response shape differs):
          *   - GET      -> { success: true, data: <raw Laravel response body> }
-         *                 Laravel's paginate() nests rows under data.data.data
          *   - POST/PUT -> { success: true, data: <created/updated record> }
          */
 
@@ -149,6 +162,15 @@
 
         function activeBadge(value) {
             return ACTIVE_BADGE_MAPPING[Boolean(value)];
+        }
+
+        const APPLICABLE_TO_BADGE_MAPPING = {
+            PORT: '<span class="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">Port</span>',
+            GENERAL: '<span class="inline-flex items-center rounded-full bg-purple-50 px-2 py-0.5 text-xs font-medium text-purple-700">General</span>',
+        };
+
+        function applicableToBadge(value) {
+            return APPLICABLE_TO_BADGE_MAPPING[value] ?? value ?? '-';
         }
 
         function getValueByPath(obj, path) {
@@ -227,6 +249,11 @@
                         label: 'Name'
                     },
                     {
+                        key: 'applicable_to',
+                        label: 'Applicable To',
+                        render: (row) => applicableToBadge(row.applicable_to)
+                    },
+                    {
                         key: 'is_active',
                         label: 'Status',
                         render: (row) => activeBadge(row.is_active)
@@ -245,6 +272,21 @@
                         type: 'text',
                         required: true,
                         placeholder: 'e.g. Documentary Stamp'
+                    },
+                    {
+                        name: 'applicable_to',
+                        label: 'Applicable To',
+                        type: 'select',
+                        required: true,
+                        options: [{
+                                value: 'PORT',
+                                label: 'Port (used in Port Charges)'
+                            },
+                            {
+                                value: 'GENERAL',
+                                label: 'General (applies to every booking)'
+                            },
+                        ],
                     },
                     {
                         name: 'is_active',
@@ -419,22 +461,11 @@
                         render: (row) => money(row.frt)
                     },
                     {
-                        key: 'bsc',
-                        label: 'BSC',
-                        render: (row) => money(row.bsc)
-                    },
-                    {
-                        key: 'ra',
-                        label: 'RA',
-                        render: (row) => money(row.ra)
-                    },
-                    {
-                        key: 'gri',
-                        label: 'GRI',
-                        render: (row) => money(row.gri)
-                    },
-                    {
                         key: 'effective_date',
+                        label: 'Effective'
+                    },
+                    {
+                        key: 'expiration_date',
                         label: 'Effective'
                     },
                     {
@@ -569,7 +600,71 @@
                         label: 'Charge Type',
                         type: 'select',
                         required: true,
-                        optionsSource: 'chargeTypes'
+                        optionsSource: 'chargeTypesPort'
+                    },
+                    {
+                        name: 'amount',
+                        label: 'Amount',
+                        type: 'number',
+                        step: '0.01',
+                        required: true
+                    },
+                    {
+                        name: 'effective_date',
+                        label: 'Effective Date',
+                        type: 'date',
+                        required: true
+                    },
+                ],
+                editFields: [{
+                        name: 'amount',
+                        label: 'Amount',
+                        type: 'number',
+                        step: '0.01',
+                        required: true
+                    },
+                    {
+                        name: 'is_active',
+                        label: 'Active',
+                        type: 'checkbox'
+                    },
+                ],
+            },
+
+            generalCharges: {
+                label: 'General Charge',
+                pk: 'general_charge_id',
+                listUrl: '/api/generalCharges',
+                createUrl: '/api/generalCharges',
+                updateUrl: (id) => `/api/generalCharges/${id}`,
+                deleteUrl: (id) => `/api/generalCharges/${id}`,
+                versioned: true,
+                columns: [{
+                        key: 'charge_type',
+                        label: 'Charge Type',
+                        render: (row) => row.charge_type?.name ?? '-'
+                    },
+                    {
+                        key: 'amount',
+                        label: 'Amount',
+                        render: (row) => money(row.amount)
+                    },
+                    {
+                        key: 'effective_date',
+                        label: 'Effective'
+                    },
+                    {
+                        key: 'is_active',
+                        label: 'Status',
+                        render: (row) => activeBadge(row.is_active)
+                    },
+                ],
+                fields: [{
+                        name: 'charge_type_id',
+                        label: 'Charge Type',
+                        type: 'select',
+                        required: true,
+                        optionsSource: 'chargeTypesGeneral'
                     },
                     {
                         name: 'amount',
@@ -807,6 +902,18 @@
                 value: 'charge_type_id',
                 label: (row) => row.name
             },
+            // Filtered variants so a Port Charge can only pick a PORT-applicable
+            // charge type, and a General Charge only a GENERAL-applicable one.
+            chargeTypesPort: {
+                url: '/api/chargeTypes?applicable_to=PORT&per_page=100',
+                value: 'charge_type_id',
+                label: (row) => row.name
+            },
+            chargeTypesGeneral: {
+                url: '/api/chargeTypes?applicable_to=GENERAL&per_page=100',
+                value: 'charge_type_id',
+                label: (row) => row.name
+            },
             deliveryTypes: {
                 url: '/api/deliveryTypes?per_page=100',
                 value: 'delivery_type_id',
@@ -860,7 +967,7 @@
             });
 
             renderTableHead(key);
-            loadList(key);
+            getOrCreateTable(key).load(1);
         }
 
         // -----------------------------------------------------------------
@@ -879,56 +986,6 @@
 
             headRow.innerHTML =
                 `${headCells}<th class="px-4 py-2.5 text-right text-xs font-medium text-zinc-500 uppercase tracking-wide">Actions</th>`;
-        }
-
-        function emptyStateRow(colspan, label) {
-            return `
-            <tr>
-                <td colspan="${colspan}" class="px-4 py-10 text-center text-sm text-zinc-400">
-                    No ${label} records yet.
-                </td>
-            </tr>
-        `;
-        }
-
-        async function loadList(key) {
-            const config = ENTITY_CONFIG[key];
-            const body = document.querySelector(`[data-table-body="${key}"]`);
-            if (!body) return;
-
-            const response = await apiCall({
-                mode: 'GET',
-                url: config.listUrl,
-            });
-
-            console.log(response);
-
-            if (!response.success) {
-                showMessage({
-                    status: 'error',
-                    title: 'Error',
-                    message: `Unable to load ${config.label} list. Please contact the system administrator.`,
-                });
-                return;
-            }
-
-            // ADJUST ME: change this line if your apiCall/pagination shape differs.
-            const rows = response.data?.data ?? [];
-
-            if (!rows.length) {
-                body.innerHTML = emptyStateRow(config.columns.length + 1, config.label);
-                return;
-            }
-
-            body.innerHTML = rows.map((row) => buildRow(key, config, row)).join('');
-
-            body.querySelectorAll('[data-edit-id]').forEach((btn) => {
-                btn.addEventListener('click', () => openEditForm(key, btn.dataset.editId));
-            });
-
-            body.querySelectorAll('[data-delete-id]').forEach((btn) => {
-                btn.addEventListener('click', () => deleteRow(key, btn.dataset.deleteId));
-            });
         }
 
         function buildRow(key, config, row) {
@@ -950,6 +1007,46 @@
                 </td>
             </tr>
         `;
+        }
+
+        // -----------------------------------------------------------------
+        // One createRemoteTable() instance per entity (see public/js/remote-table.js).
+        // Handles fetching, pagination, and search - this file only supplies
+        // the row template and rebinds the Edit/Delete buttons after each render.
+        // -----------------------------------------------------------------
+        const tables = {};
+
+
+        function getOrCreateTable(key) {
+            if (tables[key]) return tables[key];
+
+            const config = ENTITY_CONFIG[key];
+
+            tables[key] = window.createRemoteTable({
+                url: config.listUrl,
+                tableBodySelector: document.querySelector(`[data-table-body="${key}"]`),
+                paginationSelector: document.querySelector(`[data-table-pagination="${key}"]`),
+                searchInputSelector: document.querySelector(`#${key}SearchInput`),
+                searchButtonSelector: document.querySelector(`#${key}SearchBtn`),
+                emptyMessage: `No ${config.label} records yet.`,
+                colspan: config.columns.length + 1,
+                rowTemplate: (row) => buildRow(key, config, row),
+                afterRender: () => {
+                    document.querySelectorAll(`[data-table-body="${key}"] [data-edit-id]`).forEach((
+                        btn) => {
+                        btn.addEventListener('click', () => openEditForm(key, btn.dataset
+                            .editId));
+                    });
+
+                    document.querySelectorAll(`[data-table-body="${key}"] [data-delete-id]`).forEach((
+                        btn) => {
+                        btn.addEventListener('click', () => deleteRow(key, btn.dataset
+                            .deleteId));
+                    });
+                },
+            });
+
+            return tables[key];
         }
 
         // -----------------------------------------------------------------
@@ -996,12 +1093,20 @@
             }
 
             if (field.type === 'select') {
+                // Static options (e.g. a fixed PORT/GENERAL choice) vs dynamic
+                // optionsSource (fetched from another endpoint) are both
+                // supported - static ones render inline immediately.
+                const staticOptionsHtml = (field.options ?? [])
+                    .map((opt) => `<option value="${opt.value}">${opt.label}</option>`)
+                    .join('');
+
                 return `
                 <div>
                     <label class="block text-sm font-medium text-zinc-700 mb-1">${field.label}${field.required ? ' *' : ''}</label>
                     <select name="${field.name}" ${field.required ? 'required' : ''}
                             class="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-orange-500 focus:ring-orange-500">
                         <option value="">Select ${field.label}</option>
+                        ${staticOptionsHtml}
                     </select>
                 </div>
             `;
@@ -1133,14 +1238,13 @@
             });
 
             closeSideModal('maintenanceFormModal');
-            loadList(activeTab);
+            getOrCreateTable(activeTab).reload();
         }
 
         async function deleteRow(key, id) {
             const config = ENTITY_CONFIG[key];
 
-            const confirmed = await customConfirm(`Delete this ${config.label}? This cannot be undone.`);
-            if (!confirmed) return;
+            if (!confirm(`Delete this ${config.label}? This cannot be undone.`)) return;
 
             const response = await apiCall({
                 mode: 'POST', // most apiCall wrappers proxy DELETE through POST + _method; adjust if yours supports 'DELETE' directly
@@ -1165,7 +1269,7 @@
                 title: 'Deleted',
                 message: `${config.label} removed.`
             });
-            loadList(key);
+            getOrCreateTable(key).reload();
         }
 
         // -----------------------------------------------------------------

@@ -345,7 +345,7 @@ window.customConfirm = function customConfirm(message) {
 };
 
 window.clearInputs = function clearInputs() {
-  document.querySelectorAll("input").forEach((input) => {
+  document.querySelectorAll('input:not([type="radio"])').forEach((input) => {
     input.value = "";
   });
 

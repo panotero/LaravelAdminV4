@@ -11,18 +11,16 @@ class LaneController extends Controller
     public function index(Request $request)
     {
         $lanes = Lane::query()
-            ->with([
-                'originPort:port_id,code,name',
-                'destinationPort:port_id,code,name'
-            ])
+            ->with(['originPort:port_id,code,name', 'destinationPort:port_id,code,name'])
             ->when($request->filled('origin_port_id'), fn($q) => $q->where('origin_port_id', $request->origin_port_id))
             ->when($request->filled('destination_port_id'), fn($q) => $q->where('destination_port_id', $request->destination_port_id))
+            ->when($request->filled('search'), fn($q) => $q->where(function ($q) use ($request) {
+                $q->whereHas('originPort', fn($q) => $q->where('code', 'like', "%{$request->search}%"))
+                    ->orWhereHas('destinationPort', fn($q) => $q->where('code', 'like', "%{$request->search}%"));
+            }))
             ->paginate($request->get('per_page', 25));
 
-        return response()->json([
-            'success' => true,
-            'data' => $lanes,
-        ]);
+        return response()->json(['success' => true, 'data' => $lanes]);
     }
 
     public function store(Request $request)

@@ -10,13 +10,15 @@ class DeliveryTypeController extends Controller
 {
     public function index(Request $request)
     {
-        $deliveryTypes = DeliveryType::orderBy('name')
+        $deliveryTypes = DeliveryType::query()
+            ->when($request->filled('search'), fn($q) => $q->where(function ($q) use ($request) {
+                $q->where('code', 'like', "%{$request->search}%")
+                    ->orWhere('name', 'like', "%{$request->search}%");
+            }))
+            ->orderBy('name')
             ->paginate($request->get('per_page', 25));
 
-        return response()->json([
-            'success' => true,
-            'data' => $deliveryTypes,
-        ]);
+        return response()->json(['success' => true, 'data' => $deliveryTypes]);
     }
 
     public function store(Request $request)
