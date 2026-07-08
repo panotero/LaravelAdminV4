@@ -137,8 +137,6 @@
 
         }
 
-        s
-
         function renderTable() {
             const thead = [{
                     title: "Code",

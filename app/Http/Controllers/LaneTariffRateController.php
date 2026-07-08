@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Concerns\ManagesVersionedRates;
 use App\Models\LaneTariffRate;
+use App\Models\LaneTariffRatePrice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -35,13 +36,11 @@ class LaneTariffRateController extends Controller
      */
     public function store(Request $request)
     {
+        // dd($request->all());
         $validated = $request->validate([
             'lane_id' => ['required', 'integer', 'exists:lanes,lane_id'],
-            'frt' => ['required', 'numeric', 'min:0'],
-            'bsc' => ['required', 'numeric', 'min:0'],
-            'ra' => ['required', 'numeric', 'min:0'],
-            'gri' => ['required', 'numeric', 'min:0'],
             'effective_date' => ['required', 'date'],
+            'end_date' => ['required', 'date'],
         ]);
 
 
@@ -75,13 +74,6 @@ class LaneTariffRateController extends Controller
 
             return $rate;
         });
-        foreach ($request->input('prices', []) as $price) {
-            if (!isset($price['container_variant_id']) || $price['frt'] === '' || $price['frt'] === null) continue;
-            $rate->prices()->create([
-                'container_variant_id' => $price['container_variant_id'],
-                'frt' => $price['frt'],
-            ]);
-        }
 
         return response()->json([
             'success' => true,

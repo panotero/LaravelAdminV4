@@ -22,6 +22,11 @@ class CrmLead extends Model
         'status_updated_at'
     ];
 
+    protected $casts = [
+        'created_at' => 'datetime:Y-m-d h:i:s A',
+        'updated_at' => 'datetime:Y-m-d h:i:s A',
+    ];
+
 
     public function uniqueIds(): array
     {

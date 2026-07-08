@@ -13,6 +13,8 @@ class Port extends Model
 
     protected $casts = [
         'is_active' => 'boolean',
+        'created_at' => 'datetime:Y-m-d h:i:s A',
+        'updated_at' => 'datetime:Y-m-d h:i:s A',
     ];
 
     public function serviceableAreas(): HasMany

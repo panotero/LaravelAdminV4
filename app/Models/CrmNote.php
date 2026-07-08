@@ -14,6 +14,11 @@ class CrmNote extends Model
         'created_by'
     ];
 
+    protected $casts = [
+        'created_at' => 'datetime:Y-m-d h:i:s A',
+        'updated_at' => 'datetime:Y-m-d h:i:s A',
+    ];
+
     public function user()
     {
         return $this->hasOne(User::class, 'id', 'created_by');

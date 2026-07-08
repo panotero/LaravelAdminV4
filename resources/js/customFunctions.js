@@ -314,6 +314,15 @@ window.formatDateTime = function formatDateTime(dateString) {
     hour12: true,
   });
 };
+window.formatDate = function formatDate(dateString) {
+  const date = new Date(dateString);
+
+  return date.toLocaleString("en-PH", {
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+  });
+};
 window.customConfirm = function customConfirm(message) {
   return new Promise((resolve) => {
     const modal = document.getElementById("customConfirmModal");

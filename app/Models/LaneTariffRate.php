@@ -14,20 +14,12 @@ class LaneTariffRate extends Model
 
     protected $fillable = [
         'lane_id',
-        'frt',
-        'bsc',
-        'ra',
-        'gri',
         'effective_date',
         'end_date',
         'is_active',
     ];
 
     protected $casts = [
-        'frt' => 'decimal:2',
-        'bsc' => 'decimal:2',
-        'ra' => 'decimal:2',
-        'gri' => 'decimal:2',
         'effective_date' => 'date',
         'end_date' => 'date',
         'is_active' => 'boolean',

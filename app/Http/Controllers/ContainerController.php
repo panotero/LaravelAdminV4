@@ -12,7 +12,7 @@ class ContainerController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Container::with(['type', 'variants.containerClass', 'variants.containerSize']);
+        $query = Container::with(['variants.containerClass', 'variants.containerSize']);
 
         if ($search = $request->query('search')) {
             $query->where(function ($q) use ($search) {
@@ -36,7 +36,6 @@ class ContainerController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'container_type_id' => ['required', 'exists:container_type,id'],
             'code' => ['required', 'string', 'max:255', 'unique:containers,code'],
             'name' => ['required', 'string', 'max:255'],
             'is_active' => ['sometimes', 'boolean'],
@@ -53,7 +52,6 @@ class ContainerController extends Controller
 
         $container = DB::transaction(function () use ($data) {
             $container = Container::create([
-                'container_type_id' => $data['container_type_id'],
                 'code' => $data['code'],
                 'name' => $data['name'],
                 'is_active' => $data['is_active'] ?? true,

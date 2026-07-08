@@ -7,10 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Container extends Model
 {
-    protected $fillable = ['container_type_id', 'code', 'name', 'is_active'];
+    protected $fillable = ['code', 'name', 'is_active'];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'created_at' => 'datetime:Y-m-d h:i:s A',
+        'updated_at' => 'datetime:Y-m-d h:i:s A',
     ];
 
     public function type()

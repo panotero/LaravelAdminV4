@@ -15,6 +15,9 @@ use App\Http\Controllers\TruckingTariffController;
 use App\Http\Controllers\VatRateController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ContainerController;
+use App\Http\Controllers\ContainerClassController;
+use App\Http\Controllers\ContainerSizeController;
+
 
 // =========================================================
 // Maintenance: master data
@@ -162,11 +165,18 @@ Route::get('/containerTypes', fn() => response()->json([
     'success' => true,
     'data' => \DB::table('container_type')->orderBy('type')->get(),
 ]));
-Route::get('/containerClasses', fn() => response()->json([
-    'success' => true,
-    'data' => \DB::table('container_class')->orderBy('class')->get(),
-]));
-Route::get('/containerSizes', fn() => response()->json([
-    'success' => true,
-    'data' => \DB::table('container_size')->orderBy('size')->get(),
-]));
+Route::prefix('containerClasses')->group(function () {
+    Route::get('/', [ContainerClassController::class, 'index']);
+    Route::get('/{containerClass}', [ContainerClassController::class, 'show']);
+    Route::post('/', [ContainerClassController::class, 'store']);
+    Route::put('/{containerClass}', [ContainerClassController::class, 'update']);
+    Route::delete('/{containerClass}', [ContainerClassController::class, 'destroy']);
+});
+
+Route::prefix('containerSizes')->group(function () {
+    Route::get('/', [ContainerSizeController::class, 'index']);
+    Route::get('/{containerSize}', [ContainerSizeController::class, 'show']);
+    Route::post('/', [ContainerSizeController::class, 'store']);
+    Route::put('/{containerSize}', [ContainerSizeController::class, 'update']);
+    Route::delete('/{containerSize}', [ContainerSizeController::class, 'destroy']);
+});

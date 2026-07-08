@@ -15,6 +15,25 @@ class ContractController extends Controller
     {
         $contracts = Contract::query()
             ->with(['proposal:id,code', 'lead'])
+
+            // Search
+            ->when($request->filled('search'), function ($q) use ($request) {
+                $search = $request->search;
+
+                $q->where(function ($q) use ($search) {
+                    $q->where('code', 'like', "%{$search}%")
+                        ->orWhereHas('proposal', function ($q) use ($search) {
+                            $q->where('code', 'like', "%{$search}%");
+                        })
+                        ->orWhereHas('lead', function ($q) use ($search) {
+                            $q->where('contact_name', 'like', "%{$search}%")
+                                ->orWhereHas('company', function ($q) use ($search) {
+                                    $q->where('company_name', 'like', "%{$search}%");
+                                });
+                        });
+                });
+            })
+
             ->when($request->filled('lead_id'), fn($q) => $q->where('lead_id', $request->lead_id))
 
             ->when($request->filled('status'), function ($q) use ($request) {
@@ -41,12 +60,11 @@ class ContractController extends Controller
 
                     case 'all':
                     default:
-                        // No filtering
                         break;
                 }
             })
 
-            ->latest('id')
+            ->latest('updated_at')
             ->paginate($request->get('per_page', 15))
             ->appends($request->query());
 

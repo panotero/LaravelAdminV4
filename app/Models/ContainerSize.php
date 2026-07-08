@@ -8,4 +8,8 @@ class ContainerSize extends Model
 {
     protected $table = 'container_size';
     protected $fillable = ['size'];
+    protected $casts = [
+        'created_at' => 'datetime:Y-m-d h:i:s A',
+        'updated_at' => 'datetime:Y-m-d h:i:s A',
+    ];
 }

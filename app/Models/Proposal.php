@@ -18,6 +18,11 @@ class Proposal extends Model
         'code',
     ];
 
+    protected $casts = [
+        'created_at' => 'datetime:Y-m-d h:i:s A',
+        'updated_at' => 'datetime:Y-m-d h:i:s A',
+    ];
+
     public function uniqueIds(): array
     {
         return ['uuid'];

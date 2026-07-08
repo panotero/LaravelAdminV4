@@ -18,6 +18,12 @@
                 data-tab="containers">Containers</button>
             <button type="button"
                 class="maintenance-tab-btn px-3.5 py-2 text-sm font-medium border-b-2 border-transparent text-zinc-500 hover:text-zinc-800"
+                data-tab="containerClasses">Container Classes</button>
+            <button type="button"
+                class="maintenance-tab-btn px-3.5 py-2 text-sm font-medium border-b-2 border-transparent text-zinc-500 hover:text-zinc-800"
+                data-tab="containerSizes">Container Sizes</button>
+            <button type="button"
+                class="maintenance-tab-btn px-3.5 py-2 text-sm font-medium border-b-2 border-transparent text-zinc-500 hover:text-zinc-800"
                 data-tab="chargeTypes">Charge Types</button>
             <button type="button"
                 class="maintenance-tab-btn px-3.5 py-2 text-sm font-medium border-b-2 border-transparent text-zinc-500 hover:text-zinc-800"
@@ -54,6 +60,8 @@
         @foreach ([
         'ports' => 'Ports',
         'containers' => 'Containers',
+        'containerClasses' => 'Container Classes',
+        'containerSizes' => 'Container Sizes',
         'chargeTypes' => 'Charge Types',
         'deliveryTypes' => 'Delivery Types',
         'serviceableAreas' => 'Serviceable Areas',
@@ -135,22 +143,14 @@
         <input type="hidden" id="containerIdInput">
 
         <div class="grid grid-cols-2 gap-3">
-            <div class="col-span-2">
-                <label class="block text-sm font-medium text-zinc-700 mb-1">
-                    Container Type *
-                </label>
-                <input type="text" id="containerTypeInput" required
-                    placeholder="e.g. Dry Van, Reefer, Open Top, Flat Rack"
-                    class="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-orange-500 focus:ring-orange-500">
-            </div>
             <div>
                 <label class="block text-sm font-medium text-zinc-700 mb-1">Code *</label>
-                <input type="text" id="containerCodeInput" required placeholder="e.g. RF-20"
+                <input type="text" id="containerCodeInput" required placeholder="e.g. CV"
                     class="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-orange-500 focus:ring-orange-500">
             </div>
             <div>
                 <label class="block text-sm font-medium text-zinc-700 mb-1">Name *</label>
-                <input type="text" id="containerNameInput" required placeholder="e.g. 20ft Reefer"
+                <input type="text" id="containerNameInput" required placeholder="e.g. Con Van"
                     class="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-orange-500 focus:ring-orange-500">
             </div>
             <div class="col-span-2">
@@ -321,11 +321,6 @@
                         label: 'Name'
                     },
                     {
-                        key: 'type',
-                        label: 'Type',
-                        render: (row) => row.type?.type ?? '-'
-                    },
-                    {
                         key: 'variants',
                         label: 'Combinations',
                         render: (row) => (row.variants?.length ?? 0)
@@ -337,6 +332,45 @@
                     },
                 ],
                 fields: [],
+            },
+            containerClasses: {
+                label: 'Container Class',
+                pk: 'id',
+                listUrl: '/api/containerClasses',
+                createUrl: '/api/containerClasses',
+                updateUrl: (id) => `/api/containerClasses/${id}`,
+                deleteUrl: (id) => `/api/containerClasses/${id}`,
+                columns: [{
+                    key: 'class',
+                    label: 'Class'
+                }, ],
+                fields: [{
+                    name: 'class',
+                    label: 'Class',
+                    type: 'text',
+                    required: true,
+                    placeholder: 'e.g. A'
+                }, ],
+            },
+
+            containerSizes: {
+                label: 'Container Size',
+                pk: 'id',
+                listUrl: '/api/containerSizes',
+                createUrl: '/api/containerSizes',
+                updateUrl: (id) => `/api/containerSizes/${id}`,
+                deleteUrl: (id) => `/api/containerSizes/${id}`,
+                columns: [{
+                    key: 'size',
+                    label: 'Size'
+                }, ],
+                fields: [{
+                    name: 'size',
+                    label: 'Size',
+                    type: 'text',
+                    required: true,
+                    placeholder: 'e.g. 20-FOOTER'
+                }, ],
             },
 
             chargeTypes: {
@@ -562,17 +596,15 @@
                             `${row.lane?.origin_port?.code ?? '-'} → ${row.lane?.destination_port?.code ?? '-'}`
                     },
                     {
-                        key: 'frt',
-                        label: 'FRT',
-                        render: (row) => money(row.frt)
-                    },
-                    {
                         key: 'effective_date',
-                        label: 'Effective'
+                        label: 'Effective',
+                        render: (row) => formatDate(row.effective_date)
                     },
                     {
-                        key: 'expiration_date',
-                        label: 'Effective'
+                        key: 'end_date',
+                        label: 'End Date',
+                        render: (row) => formatDate(row.end_date)
+
                     },
                     {
                         key: 'is_active',
@@ -589,36 +621,14 @@
                         optionsSource: 'lanes'
                     },
                     {
-                        name: 'frt',
-                        label: 'FRT',
-                        type: 'number',
-                        step: '0.01',
-                        required: true
-                    },
-                    {
-                        name: 'bsc',
-                        label: 'BSC',
-                        type: 'number',
-                        step: '0.01',
-                        required: true
-                    },
-                    {
-                        name: 'ra',
-                        label: 'RA',
-                        type: 'number',
-                        step: '0.01',
-                        required: true
-                    },
-                    {
-                        name: 'gri',
-                        label: 'GRI',
-                        type: 'number',
-                        step: '0.01',
-                        required: true
-                    },
-                    {
                         name: 'effective_date',
                         label: 'Effective Date',
+                        type: 'date',
+                        required: true
+                    },
+                    {
+                        name: 'end_date',
+                        label: 'Expiration Date',
                         type: 'date',
                         required: true
                     },
@@ -626,39 +636,10 @@
                 // Shown when editing an existing row - amounts + status only,
                 // matches the controller's update() which won't touch lane_id/effective_date
                 editFields: [{
-                        name: 'frt',
-                        label: 'FRT',
-                        type: 'number',
-                        step: '0.01',
-                        required: true
-                    },
-                    {
-                        name: 'bsc',
-                        label: 'BSC',
-                        type: 'number',
-                        step: '0.01',
-                        required: true
-                    },
-                    {
-                        name: 'ra',
-                        label: 'RA',
-                        type: 'number',
-                        step: '0.01',
-                        required: true
-                    },
-                    {
-                        name: 'gri',
-                        label: 'GRI',
-                        type: 'number',
-                        step: '0.01',
-                        required: true
-                    },
-                    {
-                        name: 'is_active',
-                        label: 'Active',
-                        type: 'checkbox'
-                    },
-                ],
+                    name: 'is_active',
+                    label: 'Active',
+                    type: 'checkbox'
+                }, ],
             },
 
             portCharges: {
@@ -686,7 +667,8 @@
                     },
                     {
                         key: 'effective_date',
-                        label: 'Effective'
+                        label: 'Effective',
+                        render: (row) => formatDate(row.effective_date)
                     },
                     {
                         key: 'is_active',
@@ -757,7 +739,8 @@
                     },
                     {
                         key: 'effective_date',
-                        label: 'Effective'
+                        label: 'Effective',
+                        render: (row) => formatDate(row.effective_date)
                     },
                     {
                         key: 'is_active',
@@ -821,7 +804,8 @@
                     },
                     {
                         key: 'effective_date',
-                        label: 'Effective'
+                        label: 'Effective',
+                        render: (row) => formatDate(row.effective_date)
                     },
                     {
                         key: 'is_active',
@@ -891,7 +875,8 @@
                     },
                     {
                         key: 'effective_date',
-                        label: 'Effective'
+                        label: 'Effective',
+                        render: (row) => formatDate(row.effective_date)
                     },
                     {
                         key: 'is_active',
@@ -957,7 +942,8 @@
                     },
                     {
                         key: 'effective_date',
-                        label: 'Effective'
+                        label: 'Effective',
+                        render: (row) => formatDate(row.effective_date)
                     },
                     {
                         key: 'is_active',
@@ -977,6 +963,7 @@
                         label: 'Effective Date',
                         type: 'date',
                         required: true
+
                     },
                 ],
                 editFields: [{
@@ -1434,13 +1421,13 @@
                 }),
             ]);
 
-            const typeSelect = document.getElementById('containerTypeSelect');
+            // to:
             if (classesRes.success) {
-                containerClassOptionsHtml = classesRes.data.map((c) =>
+                containerClassOptionsHtml = classesRes.data.data.map((c) =>
                     `<option value="${c.id}">${c.class}</option>`).join('');
             }
             if (sizesRes.success) {
-                containerSizeOptionsHtml = sizesRes.data.map((s) =>
+                containerSizeOptionsHtml = sizesRes.data.data.map((s) =>
                     `<option value="${s.id}">${s.size}</option>`).join('');
             }
         }
@@ -1503,7 +1490,6 @@
                 }
                 const row = response.data;
                 document.getElementById('containerIdInput').value = row.id;
-                document.getElementById('containerTypeSelect').value = row.container_type_id;
                 document.getElementById('containerCodeInput').value = row.code;
                 document.getElementById('containerNameInput').value = row.name;
                 document.getElementById('containerActiveInput').checked = Boolean(row.is_active);
@@ -1540,7 +1526,6 @@
             }
 
             const payload = {
-                container_type_id: document.getElementById('containerTypeSelect').value,
                 code: document.getElementById('containerCodeInput').value,
                 name: document.getElementById('containerNameInput').value,
                 is_active: document.getElementById('containerActiveInput').checked,

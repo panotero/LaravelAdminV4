@@ -15,17 +15,25 @@ class Contract extends Model
     public const STATUS_TERMINATED = 4;
 
     protected $fillable = [
-        'uuid', 'code', 'proposal_id', 'lead_id',
-        'signed_date', 'valid_from', 'valid_to',
-        'status', 'signed_document_path', 'created_by',
+        'uuid',
+        'code',
+        'proposal_id',
+        'lead_id',
+        'signed_date',
+        'valid_from',
+        'valid_to',
+        'status',
+        'signed_document_path',
+        'created_by',
     ];
 
     protected $casts = [
-        'signed_date' => 'date',
-        'valid_from' => 'date',
-        'valid_to' => 'date',
+        'signed_date' => 'datetime:Y-m-d h:i:s A',
+        'valid_from' => 'datetime:Y-m-d h:i:s A',
+        'valid_to' => 'datetime:Y-m-d h:i:s A',
         'status' => 'integer',
     ];
+
 
     protected static function booted(): void
     {
