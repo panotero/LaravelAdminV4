@@ -279,6 +279,13 @@
         const params = new URLSearchParams(window.location.search);
         let clientUuid = window.clientMasterFormUuid || null;
         window.clientMasterFormUuid = null;
+
+        let leadId = window.clientMasterFormLeadId || null;
+        window.clientMasterFormLeadId = null;
+
+        let prefillData = window.clientMasterFormPrefill || null;
+        window.clientMasterFormPrefill = null;
+
         let currentStage = 1;
 
         // -------------------- STEPPER --------------------
@@ -314,6 +321,7 @@
             const form = document.getElementById('stage1Form');
             const data = Object.fromEntries(new FormData(form).entries());
             if (clientUuid) data.uuid = clientUuid;
+            if (leadId) data.lead_id = leadId;
 
             const response = await apiCall({
                 mode: 'POST',
@@ -333,8 +341,6 @@
             }
 
             clientUuid = response.data.uuid;
-            // REMOVED: history.replaceState(...) — no longer needed, and was
-            // the thing polluting the browser URL for the next page load.
             showMessage({
                 status: 'success',
                 title: 'Company Information Saved'
@@ -352,6 +358,16 @@
             document.getElementById('invoiceCourierFields').classList.add('hidden');
             document.getElementById('checkPickupFields').classList.add('hidden');
             document.getElementById('directRemittanceFields').classList.add('hidden');
+
+            // Prefill from a CRM lead, if this form was opened from one.
+            if (prefillData) {
+                const stage1Form = document.getElementById('stage1Form');
+                Object.entries(prefillData).forEach(([key, val]) => {
+                    const el = stage1Form.querySelector(`[name="${key}"]`);
+                    if (el && val) el.value = val;
+                });
+                document.getElementById('formPageTitle').textContent = 'New Client Master Data (from Lead)';
+            }
         }
 
         // -------------------- STAGE 2: dynamic rows --------------------
@@ -515,12 +531,22 @@
 
             showMessage({
                 status: 'success',
-                title: 'Client Master Data Completed!'
+                title: leadId ?
+                    'Client Master Data Completed! Lead moved to Opportunity.' :
+                    'Client Master Data Completed!'
             });
-            loadPage({
-                title: 'Client Masters',
-                link: '/page_clientMasters'
-            });
+
+            if (leadId) {
+                loadPage({
+                    title: 'CRM Leads',
+                    link: '/page_crm'
+                });
+            } else {
+                loadPage({
+                    title: 'Client Masters',
+                    link: '/page_clientMasters'
+                });
+            }
         });
 
         document.getElementById('btnBackToList').addEventListener('click', () => {

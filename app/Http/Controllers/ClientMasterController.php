@@ -11,6 +11,9 @@ use App\Models\ClientBilling;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use App\Models\CrmLead;
+use App\Models\CrmStatus;
+use Illuminate\Support\Facades\Validator;
 
 class ClientMasterController extends Controller
 {
@@ -66,36 +69,66 @@ class ClientMasterController extends Controller
      */
     public function saveStage1(Request $request)
     {
-        $validated = $request->validate([
-            'uuid' => ['nullable', 'string'],
+        $validator = Validator::make($request->all(), [
+            'uuid' => ['nullable', 'exists:client_masters,uuid'],
+            'lead_id' => ['nullable', 'exists:crm_leads,id'],
             'customer_code' => ['nullable', 'string', 'max:255'],
             'company_name' => ['nullable', 'string', 'max:255'],
             'registered_address' => ['nullable', 'string'],
-            'contact_number_1' => ['nullable', 'string', 'max:50'],
-            'contact_number_2' => ['nullable', 'string', 'max:50'],
+            'contact_number_1' => ['nullable', 'string', 'max:255'],
+            'contact_number_2' => ['nullable', 'string', 'max:255'],
             'industry' => ['nullable', 'string', 'max:255'],
             'organization_type' => ['nullable', 'string', 'max:255'],
             'tin' => ['nullable', 'string', 'max:255'],
             'business_start_date' => ['nullable', 'date'],
             'estimated_annual_revenue' => ['nullable', 'numeric'],
-            'company_url' => ['nullable', 'url'],
+            'company_url' => ['nullable', 'string', 'max:255'],
         ]);
 
-        $client = DB::transaction(function () use ($validated, $request) {
-            $client = !empty($validated['uuid'])
-                ? ClientMaster::where('uuid', $validated['uuid'])->firstOrFail()
-                : new ClientMaster(['uuid' => (string) Str::uuid(), 'created_by' => $request->user()?->id]);
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'invalid_fields' => $validator->errors(),
+            ], 422);
+        }
 
-            unset($validated['uuid']);
-            $client->fill($validated);
+        $data = $validator->validated();
+
+        $client = DB::transaction(function () use ($data) {
+
+            $client = !empty($data['uuid'])
+                ? ClientMaster::where('uuid', $data['uuid'])->firstOrFail()
+                : new ClientMaster([
+                    'uuid' => (string) Str::uuid(),
+                ]);
+
+            // Only set lead_id during creation.
+            if (!$client->exists) {
+                if (!empty($data['lead_id'])) {
+                    $client->lead_id = $data['lead_id'];
+                }
+
+                $client->created_by = auth()->id();
+            }
+
+            $client->fill(
+                collect($data)
+                    ->except(['uuid', 'lead_id'])
+                    ->toArray()
+            );
+
             $client->current_stage = max($client->current_stage ?? 1, 1);
+
             $client->save();
             $client->recomputeCompletion();
 
             return $client;
         });
 
-        return response()->json(['success' => true, 'data' => $client], 201);
+        return response()->json([
+            'success' => true,
+            'data' => $client,
+        ]);
     }
 
     /**
@@ -179,22 +212,55 @@ class ClientMasterController extends Controller
         ]);
 
         DB::transaction(function () use ($client, $validated) {
+
             $client->sales_rep_id = $validated['sales_rep_id'] ?? $client->sales_rep_id;
-            $client->current_stage = 3;
-            $client->save();
 
             if (!empty($validated['finance'])) {
-                $client->finance()->updateOrCreate(['client_id' => $client->id], $validated['finance']);
+                $client->finance()->updateOrCreate(
+                    ['client_id' => $client->id],
+                    $validated['finance']
+                );
             }
 
             if (!empty($validated['billing'])) {
-                $client->billing()->updateOrCreate(['client_id' => $client->id], $validated['billing']);
+                $client->billing()->updateOrCreate(
+                    ['client_id' => $client->id],
+                    $validated['billing']
+                );
             }
 
+            $client->current_stage = 3;
+            $client->is_complete = true;
+            $client->save();
+
             $client->recomputeCompletion();
+
+            // If created from CRM Lead, move it to Opportunity.
+            if ($client->lead_id) {
+
+                $opportunityStatus = CrmStatus::where('status', 'OPPORTUNITY')->first();
+
+                if ($opportunityStatus) {
+                    CrmLead::where('id', $client->lead_id)->update([
+                        'status' => $opportunityStatus->id,
+                        'status_updated_at' => now(),
+                    ]);
+                }
+            }
         });
 
-        return response()->json(['success' => true, 'data' => $client->load('finance', 'billing')]);
+        $client->load([
+            'contacts',
+            'tradeReferences',
+            'finance',
+            'billing',
+            'salesRep',
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'data' => $client,
+        ]);
     }
 
     public function destroy($uuid)

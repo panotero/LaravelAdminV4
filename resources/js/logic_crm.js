@@ -645,22 +645,20 @@ window.initCrmLogic = function initCrmLogic() {
   document
     .getElementById("NewProposalBtn")
     .addEventListener("click", function () {
-      const proposalModal = document.querySelector("#generateProposal");
-      if (!proposalModal) return;
+      // leadInfo is already populated by loadLeadInfo() whenever the
+      // LeadInfoModal is open, so we can prefill straight from it.
+      window.clientMasterFormUuid = null;
+      window.clientMasterFormLeadId = leadInfo?.id ?? null;
+      window.clientMasterFormPrefill = {
+        company_name: leadInfo?.company?.company_name ?? "",
+        registered_address: leadInfo?.company?.company_address ?? "",
+        contact_number_1: leadInfo?.mobile ?? "",
+      };
 
-      proposalModal.querySelector('input[name="company_name"]').value =
-        leadInfo.company.company_name;
-      proposalModal.querySelector('input[name="company_address"]').value =
-        leadInfo.company.company_address;
-      proposalModal.querySelector(
-        'input[name="authorized_signatory_name"]',
-      ).value = leadInfo.company.authorized_signatory_name;
-      proposalModal.querySelector(
-        'input[name="authorized_signatory_position"]',
-      ).value = leadInfo.company.authorized_signatory_position;
-      proposalModal.dataset.leadUuid = leadUUID;
-
-      initSideModal({ modalId: "generateProposal" });
+      loadPage({
+        title: "New Client Master Data",
+        link: "/page_clientMasterForm",
+      });
     });
 
   // ============================================================

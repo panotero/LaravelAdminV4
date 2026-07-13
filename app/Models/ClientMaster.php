@@ -32,6 +32,10 @@ class ClientMaster extends Model
         'estimated_annual_revenue' => 'decimal:2',
         'is_complete' => 'boolean',
     ];
+    public function lead()
+    {
+        return $this->belongsTo(\App\Models\CrmLead::class, 'lead_id');
+    }
 
     public function uniqueIds(): array
     {
