@@ -8,10 +8,8 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\MailerController;
 use App\Http\Controllers\MenusController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\RoutingController;
-use App\Http\Controllers\ApprovalsController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\OptionController;
 use App\Http\Controllers\ListOfValueController;
@@ -59,28 +57,6 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('/reactivate/{id}', [UserController::class, 'reactivate']);
     });
 
-
-    Route::prefix('contracts')->name('contracts.')->group(function () {
-
-        Route::get('/', [ContractController::class, 'index'])
-            ->name('index');
-
-        Route::get('/{contract}', [ContractController::class, 'show'])
-            ->name('show');
-        Route::post('/', [ContractController::class, 'store'])
-            ->name('store');
-
-        Route::put('/{contract}', [ContractController::class, 'update'])
-            ->name('update');
-
-        // Delete contract
-        Route::delete('/{contract}', [ContractController::class, 'destroy'])
-            ->name('destroy');
-
-        // Cancel contract
-        Route::patch('/{contract}/cancel', [ContractController::class, 'cancel'])
-            ->name('cancel');
-    });
 
 
     Route::post('/send-mail', [MailerController::class, 'send']);
@@ -151,12 +127,6 @@ Route::middleware(['auth'])->group(function () {
     });
 
 
-    Route::prefix('proposal')->group(function () {
-        Route::get('/', [ProposalController::class, 'index']);
-        Route::post('/', [ProposalController::class, 'store']);
-        Route::get('/{proposalcode}', [ProposalController::class, 'getByCode']);
-        Route::post('/approvals', [ProposalController::class, 'processApprovals']);
-    });
     Route::prefix('listofval')->group(function () {
         Route::get('/route', [LovController::class, 'route']);
         Route::get('/service', [LovController::class, 'service']);
