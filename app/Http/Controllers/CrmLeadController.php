@@ -108,17 +108,16 @@ class CrmLeadController extends Controller
             'email' => ['nullable', 'email', 'max:255'],
             'source' => ['required', 'string', 'max:255'],
 
-            'company_name' => ['required', 'string', 'max:255'],
-            'company_address' => ['required', 'string'],
-            'address_no' => ['required', 'string', 'max:100'],
-            'address_building' => ['required', 'string', 'max:255'],
-            'address_street' => ['required', 'string', 'max:255'],
-            'address_barangay' => ['required', 'string', 'max:255'],
-            'address_town_city' => ['required', 'string', 'max:255'],
-            'address_province' => ['required', 'string', 'max:255'],
-            'address_country' => ['required', 'string', 'max:255'],
-            'address_postal_code' => ['required', 'string', 'max:20'],
-            'type_of_business' => ['required', 'string', 'max:255'],
+            'company_name' => ['nullable', 'string', 'max:255'],
+            'address_no' => ['nullable', 'string', 'max:100'],
+            'address_building' => ['nullable', 'string', 'max:255'],
+            'address_street' => ['nullable', 'string', 'max:255'],
+            'address_barangay' => ['nullable', 'string', 'max:255'],
+            'address_town_city' => ['nullable', 'string', 'max:255'],
+            'address_province' => ['nullable', 'string', 'max:255'],
+            'address_country' => ['nullable', 'string', 'max:255'],
+            'address_postal_code' => ['nullable', 'string', 'max:20'],
+            'type_of_business' => ['nullable', 'string', 'max:255'],
         ]);
 
         if ($validator->fails()) {
@@ -157,7 +156,6 @@ class CrmLeadController extends Controller
 
             $companyPayload = collect($data)->only([
                 'company_name',
-                'company_address',
                 'address_no',
                 'address_building',
                 'address_street',
@@ -187,10 +185,10 @@ class CrmLeadController extends Controller
         $lead = CrmLead::where('uuid', $uuid)->firstOrFail();
 
         $validated = $request->validate([
-            'containers' => ['required', 'array', 'min:1'],
-            'containers.*.container_type' => ['required', 'in:CV,FR,RF,LC,RC'],
-            'containers.*.origin_port_id' => ['required', 'integer', 'exists:ports,port_id'],
-            'containers.*.destination_port_id' => ['required', 'integer', 'exists:ports,port_id'],
+            'containers' => ['nullable', 'array', 'min:1'],
+            'containers.*.container_type' => ['nullable', 'in:CV,FR,RF,LC,RC'],
+            'containers.*.origin_port_id' => ['nullable', 'integer', 'exists:ports,port_id'],
+            'containers.*.destination_port_id' => ['nullable', 'integer', 'exists:ports,port_id'],
             'containers.*.booking_unit_type' => ['nullable', 'string', 'max:255'],
             'containers.*.container_class_id' => ['nullable', 'integer', 'exists:container_class,id'],
             'containers.*.container_size_id' => ['nullable', 'integer', 'exists:container_size,id'],
@@ -310,12 +308,15 @@ class CrmLeadController extends Controller
             'crmStatus:id,status',
             'user',
             'proposals.status',
-            'containers'
+            'containers.originPort:port_id,code,name',
+            'containers.destinationPort:port_id,code,name',
+            'containers.containerClass:id,class',
+            'containers.containerSize:id,size'
         )->where('uuid', $uuid)->firstOrFail();
 
         return response()->json([
             'success' => true,
-            'data' => $lead
+            'data' => $lead,
         ]);
     }
 

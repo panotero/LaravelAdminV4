@@ -14,6 +14,7 @@ class CrmLead extends Model
     protected $fillable = [
         'contact_name',
         'email',
+        'position',
         'mobile',
         'status',
         'source',

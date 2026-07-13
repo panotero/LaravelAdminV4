@@ -71,9 +71,9 @@ window.initCrmLogic = function initCrmLogic() {
 
   function emptyState(message) {
     return `
-            <div class="w-full p-2 rounded-md text-center">
-                <p class="font-semibold text-zinc-400">${message}</p>
-            </div>`;
+        <div class="w-full py-3 rounded-md text-center">
+            <p class="text-xs font-medium text-zinc-400">${message}</p>
+        </div>`;
   }
 
   // ============================================================
@@ -147,11 +147,14 @@ window.initCrmLogic = function initCrmLogic() {
       thead: thead,
     });
 
+    const OPEN_MODAL_STATUSES = ["OPPORTUNITY", "NEGOTIATION", "WIN", "LOST"];
+
     function handleClick(row) {
       row.addEventListener("click", function () {
         const data = JSON.parse(row.dataset.row);
+        const status = data.crm_status?.status;
 
-        if (data.is_complete) {
+        if (OPEN_MODAL_STATUSES.includes(status)) {
           loadLeadInfo(data.uuid);
           initModal({ modalId: "LeadInfoModal" });
         } else {
@@ -219,17 +222,24 @@ window.initCrmLogic = function initCrmLogic() {
       "#leadCompanyName",
       "#leadStatus",
       "#leadContactName",
+      "#leadPosition",
       "#leadEmail",
       "#leadMobile",
       "#leadSource",
+      "#leadAssignedTo",
+      "#leadCompanyNameFull",
+      "#leadCompanyAddress",
+      "#leadTypeOfBusiness",
       "#leadEstimatedValue",
       "#leadCreatedAt",
       "#leadExpectedCloseDate",
       "#noteContainer",
       "#activityContainer",
+      "#containerListContainer",
     ].forEach((id) => $(id).html(loader));
     document.getElementById("proposalContainer").innerHTML = loader;
     leadUUID = uuid;
+
     const response = await apiCall({
       mode: "GET",
       url: `/api/crm/leads/${uuid}`,
@@ -247,8 +257,10 @@ window.initCrmLogic = function initCrmLogic() {
 
     leadInfo = response.data;
     const lead = response.data;
+    const company = lead.company ?? {};
     const value = Number(lead?.estimated_value || 0);
-    const statusClass = getStatusBadgeClass(lead.status.status);
+    const statusClass = getStatusBadgeClass(lead.crm_status.status);
+
     const opportunityBtn = document.getElementById("createClientMasterBtn");
     const isOpportunityOrLater = !["LEAD", "QUALIFIED"].includes(
       lead.crm_status.status,
@@ -258,9 +270,10 @@ window.initCrmLogic = function initCrmLogic() {
       window.clientMasterFormUuid = null;
       window.clientMasterFormLeadId = lead.id;
       window.clientMasterFormPrefill = {
-        company_name: lead.company?.company_name ?? "",
-        registered_address: lead.company?.company_address ?? "",
+        company_name: company.company_name ?? "",
+        registered_address: company.company_address ?? "",
         contact_number_1: lead.mobile ?? "",
+        industry: company.type_of_business ?? "",
       };
       loadPage({
         title: "New Client Master Data",
@@ -268,32 +281,35 @@ window.initCrmLogic = function initCrmLogic() {
       });
     };
 
-    $("#leadCompanyName").html(lead.company.company_name.toUpperCase() ?? "");
+    $("#leadCompanyName").html((company.company_name ?? "").toUpperCase());
     $("#leadStatus").html(`
-            <span class="px-3 py-1 text-xs font-semibold rounded-full ${statusClass}">
-                ${lead.crm_status.status}
-            </span>`);
-    $("#leadContactName").html(lead.contact_name ?? "");
-    $("#leadEmail").html(lead.email ?? "");
-    $("#leadMobile").html(lead.mobile ?? "");
-    $("#leadSource").html(lead.source ?? "");
+        <span class="px-3 py-1 text-xs font-semibold rounded-full ${statusClass}">
+            ${lead.crm_status.status}
+        </span>`);
+    $("#leadContactName").html(lead.contact_name ?? "-");
+    $("#leadPosition").html(lead.position ?? "-");
+    $("#leadEmail").html(lead.email ?? "-");
+    $("#leadMobile").html(lead.mobile ?? "-");
+    $("#leadSource").html(lead.source ?? "-");
+    $("#leadAssignedTo").html(lead.user?.name ?? "-");
+    $("#leadCompanyNameFull").html(company.company_name ?? "-");
+    $("#leadCompanyAddress").html(company.company_address ?? "-");
+    $("#leadTypeOfBusiness").html(company.type_of_business ?? "-");
     $("#leadEstimatedValue").html(`₱${value.toLocaleString()}`);
-    $("#leadCreatedAt").html(formatDateTime(lead.created_at) ?? "");
+    $("#leadCreatedAt").html(formatDateTime(lead.created_at) ?? "-");
     $("#leadExpectedCloseDate").html(
-      formatDateTime(lead.expected_close_date) ?? "",
+      lead.expected_close_date ? formatDateTime(lead.expected_close_date) : "-",
     );
 
     $("#contactName").val(lead.contact_name ?? "");
     $("#contactEmail").val(lead.email ?? "");
     $("#contactMobile").val(lead.mobile ?? "");
-    $("#activityStatusInput").val(lead.status.id ?? "");
-
-    $("#btnEditLead").removeClass("hidden");
-    $("#btnSaveLead").addClass("hidden");
+    $("#activityStatusInput").val(lead.status ?? "");
 
     renderActivity(lead.activities);
     renderNotes(lead.notes);
     renderProposals(lead.proposals);
+    renderContainers(lead.containers);
   }
 
   // ============================================================
@@ -342,6 +358,49 @@ window.initCrmLogic = function initCrmLogic() {
       })
       .join("");
   }
+  function renderContainers(containers) {
+    const container = document.getElementById("containerListContainer");
+
+    if (!containers || !containers.length) {
+      container.innerHTML = emptyState("No container requirements added yet.");
+      return;
+    }
+
+    const TYPE_LABELS = {
+      CV: "Container Van",
+      FR: "Flatrack",
+      RF: "Reefer Van",
+      LC: "Loose Cargo",
+      RC: "Rolling Cargo",
+    };
+
+    container.innerHTML = containers
+      .map((c) => {
+        const origin = c.origin_port ? `${c.origin_port.code}` : "-";
+        const destination = c.destination_port
+          ? `${c.destination_port.code}`
+          : "-";
+        const typeLabel = TYPE_LABELS[c.container_type] ?? c.container_type;
+        const extra = [
+          c.container_class?.class,
+          c.container_size?.size,
+          c.quantity ? `Qty: ${c.quantity}` : null,
+          c.dangerous_cargo ? "DG" : null,
+        ]
+          .filter(Boolean)
+          .join(" · ");
+
+        return `
+                <div class="border border-zinc-200 dark:border-zinc-700 rounded-md p-2 w-full flex flex-col gap-0.5">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-semibold text-zinc-800 dark:text-zinc-100">${typeLabel}</span>
+                        <span class="text-[11px] text-zinc-400">${origin} &rarr; ${destination}</span>
+                    </div>
+                    ${extra ? `<p class="text-[11px] text-zinc-500">${extra}</p>` : ""}
+                </div>`;
+      })
+      .join("");
+  }
 
   // ============================================================
   // RENDER — ACTIVITIES
@@ -350,27 +409,21 @@ window.initCrmLogic = function initCrmLogic() {
   function renderActivity(activities) {
     const container = document.getElementById("activityContainer");
 
-    if (!activities.length) {
-      container.innerHTML = emptyState("There's no activity yet.");
+    if (!activities || !activities.length) {
+      container.innerHTML = emptyState("No activities found");
       return;
     }
 
     container.innerHTML = activities
       .map(
         (activity) => `
-            <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl p-4 w-full flex justify-between items-start gap-4">
-                <div class="flex gap-3 items-start">
-                    <div class="mt-0.5 w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950 flex items-center justify-center shrink-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-blue-600 dark:text-blue-400">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                        </svg>
-                    </div>
-                    <div class="flex flex-col gap-1">
-                        <p class="text-[11px] font-medium text-zinc-400 uppercase tracking-widest">${activity.type}</p>
-                        <p class="text-sm font-medium text-zinc-800 dark:text-zinc-100">${activity.description}</p>
-                        <p class="text-[11px] text-zinc-400">${formatDateTime(activity.created_at)} &middot; ${activity.user.name}</p>
-                    </div>
+            <div class="bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-lg px-2.5 py-2 w-full">
+                <div class="flex justify-between items-baseline gap-2">
+                    <p class="text-[10px] font-semibold text-zinc-400 uppercase tracking-wide truncate">${activity.type}</p>
+                    <p class="text-[10px] text-zinc-400 shrink-0">${formatDateTime(activity.created_at)}</p>
                 </div>
+                <p class="text-xs text-zinc-800 dark:text-zinc-100 mt-0.5 leading-snug">${activity.description}</p>
+                <p class="text-[10px] text-zinc-400 mt-0.5">${activity.user.name}</p>
             </div>`,
       )
       .join("");
@@ -383,31 +436,20 @@ window.initCrmLogic = function initCrmLogic() {
   function renderNotes(notes) {
     const container = document.getElementById("noteContainer");
 
-    if (!notes.length) {
-      container.innerHTML = emptyState("There's no notes yet.");
+    if (!notes || !notes.length) {
+      container.innerHTML = emptyState("No notes found");
       return;
     }
 
     container.innerHTML = notes
       .map(
         (note) => `
-            <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl p-4 w-full flex flex-col gap-3">
-                <div class="flex justify-between items-center">
-                    <div class="flex items-center gap-2">
-                        <div class="w-6 h-6 rounded-full bg-zinc-100 dark:bg-zinc-700 flex items-center justify-center shrink-0">
-                            <span class="text-[10px] font-medium text-zinc-500 dark:text-zinc-300">${note.user.name.charAt(0).toUpperCase()}</span>
-                        </div>
-                        <p class="text-[11px] text-zinc-400">${note.user.name} &middot; ${formatDateTime(note.created_at)}</p>
-                    </div>
-                    <button class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition w-7 h-7 flex items-center justify-center rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                            <circle cx="5" cy="12" r="2"></circle>
-                            <circle cx="12" cy="12" r="2"></circle>
-                            <circle cx="19" cy="12" r="2"></circle>
-                        </svg>
-                    </button>
+            <div class="bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-lg px-2.5 py-2 w-full">
+                <div class="flex justify-between items-baseline gap-2">
+                    <p class="text-[10px] font-semibold text-zinc-500 truncate">${note.user.name}</p>
+                    <p class="text-[10px] text-zinc-400 shrink-0">${formatDateTime(note.created_at)}</p>
                 </div>
-                <p class="text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed">${note.note}</p>
+                <p class="text-xs text-zinc-700 dark:text-zinc-300 mt-0.5 leading-snug">${note.note}</p>
             </div>`,
       )
       .join("");

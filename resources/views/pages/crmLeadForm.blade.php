@@ -59,7 +59,7 @@
                     </div>
                 </div>
 
-                <div class="border-t pt-4">
+                <div class="border-t pt-4" id="company_info">
                     <p class="font-semibold text-zinc-700 mb-3">Company Information</p>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="md:col-span-2">
@@ -67,9 +67,28 @@
                             <input type="text" name="company_name" required
                                 class="w-full border rounded-lg px-3 py-2 text-sm mt-1">
                         </div>
-                        <div class="md:col-span-2">
-                            <label class="text-xs font-medium text-zinc-400 uppercase">Company Address (Full) *</label>
-                            <textarea name="company_address" rows="2" required class="w-full border rounded-lg px-3 py-2 text-sm mt-1"></textarea>
+                        <div>
+                            <label class="text-xs font-medium text-zinc-400 uppercase">Province *</label>
+                            <select name="address_province" required
+                                class="w-full border rounded-lg px-3 py-2 text-sm mt-1">
+                                <option value="">Select Province</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="text-xs font-medium text-zinc-400 uppercase">Town/City *</label>
+                            <select name="address_town_city" required
+                                class="w-full border rounded-lg px-3 py-2 text-sm mt-1" disabled>
+                                <option value="">Select Town/City</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="text-xs font-medium text-zinc-400 uppercase">Barangay *</label>
+                            <select name="address_barangay" required
+                                class="w-full border rounded-lg px-3 py-2 text-sm mt-1" disabled>
+                                <option value="">Select Barangay</option>
+                            </select>
                         </div>
                         <div>
                             <label class="text-xs font-medium text-zinc-400 uppercase">No. *</label>
@@ -84,21 +103,6 @@
                         <div>
                             <label class="text-xs font-medium text-zinc-400 uppercase">Street *</label>
                             <input type="text" name="address_street" required
-                                class="w-full border rounded-lg px-3 py-2 text-sm mt-1">
-                        </div>
-                        <div>
-                            <label class="text-xs font-medium text-zinc-400 uppercase">Barangay *</label>
-                            <input type="text" name="address_barangay" required
-                                class="w-full border rounded-lg px-3 py-2 text-sm mt-1">
-                        </div>
-                        <div>
-                            <label class="text-xs font-medium text-zinc-400 uppercase">Town/City *</label>
-                            <input type="text" name="address_town_city" required
-                                class="w-full border rounded-lg px-3 py-2 text-sm mt-1">
-                        </div>
-                        <div>
-                            <label class="text-xs font-medium text-zinc-400 uppercase">Province *</label>
-                            <input type="text" name="address_province" required
                                 class="w-full border rounded-lg px-3 py-2 text-sm mt-1">
                         </div>
                         <div>
@@ -149,6 +153,8 @@
         </div>
     </div>
 </div>
+
+<script></script>
 
 <script>
     (function() {
@@ -631,7 +637,7 @@
                 if (el) el.value = lead[key] ?? '';
             });
             [
-                'company_name', 'company_address', 'address_no', 'address_building',
+                'company_name', 'address_no', 'address_building',
                 'address_street', 'address_barangay', 'address_town_city',
                 'address_province', 'address_country', 'address_postal_code', 'type_of_business',
             ].forEach(key => {
@@ -676,5 +682,131 @@
                 addContainerCard(); // start with one blank container row
             }
         });
+
+
+        const API = "https://psgc.cloud/api";
+
+        async function request(url) {
+            const response = await fetch(url);
+
+            if (!response.ok) {
+                throw new Error(`Failed to fetch ${url}`);
+            }
+
+            return response.json();
+        }
+
+        function resetSelect(select, placeholder) {
+
+            select.innerHTML = "";
+
+            const option = document.createElement("option");
+            option.value = "";
+            option.textContent = placeholder;
+
+            select.appendChild(option);
+            select.disabled = true;
+
+        }
+
+        function populateSelect(select, items, valueField, textField, placeholder) {
+
+            resetSelect(select, placeholder);
+
+            items.forEach(item => {
+
+                const option = document.createElement("option");
+
+                option.value = item[valueField];
+                option.textContent = item[textField];
+
+                select.appendChild(option);
+
+            });
+
+            select.disabled = false;
+
+        }
+
+        const companyContainer = document.getElementById("company_info");
+        initializePhilippineAddress(companyContainer);
+        async function initializePhilippineAddress(container) {
+
+            const province = container.querySelector('[name="address_province"]');
+            const city = container.querySelector('[name="address_town_city"]');
+            const barangay = container.querySelector('[name="address_barangay"]');
+            console.log(container);
+
+            if (!province || !city || !barangay) return;
+
+            resetSelect(city, "Select Town/City");
+            resetSelect(barangay, "Select Barangay");
+
+            // Load Provinces
+            const provinces = await request(`${API}/provinces`);
+
+            provinces.sort((a, b) => a.name.localeCompare(b.name));
+
+            populateSelect(
+                province,
+                provinces,
+                "code",
+                "name",
+                "Select Province"
+            );
+
+            province.addEventListener("change", async function() {
+
+                resetSelect(city, "Loading...");
+                resetSelect(barangay, "Select Barangay");
+
+                if (!this.value) {
+                    resetSelect(city, "Select Town/City");
+                    return;
+                }
+
+                const cities = await request(
+                    `${API}/provinces/${this.value}/cities-municipalities`
+                );
+
+                cities.sort((a, b) => a.name.localeCompare(b.name));
+
+                populateSelect(
+                    city,
+                    cities,
+                    "code",
+                    "name",
+                    "Select Town/City"
+                );
+
+            });
+
+            city.addEventListener("change", async function() {
+
+                resetSelect(barangay, "Loading...");
+
+                if (!this.value) {
+                    resetSelect(barangay, "Select Barangay");
+                    return;
+                }
+
+                const barangays = await request(
+                    `${API}/cities-municipalities/${this.value}/barangays`
+                );
+
+                barangays.sort((a, b) => a.name.localeCompare(b.name));
+
+                populateSelect(
+                    barangay,
+                    barangays,
+                    "code",
+                    "name",
+                    "Select Barangay"
+                );
+
+            });
+
+        }
+
     })();
 </script>
