@@ -137,6 +137,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/vansize', [LovController::class, 'vansize']);
         Route::get('/typeofbusiness', [LovController::class, 'typeOfBusiness']);
     });
+    Route::post('/leads/uploadDgDocument', [CrmLeadController::class, 'uploadDgDocument']);
 
 
     Route::get('/roles', fn() => DB::table('setting_role')->get());

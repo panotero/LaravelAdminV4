@@ -177,6 +177,15 @@
                 label: 'Rolling Cargo (RC)'
             },
         ];
+        const SERVICE_MODE_OPTIONS = [{
+                value: 'PIER',
+                label: 'Pier'
+            },
+            {
+                value: 'DOOR',
+                label: 'Door'
+            },
+        ];
 
         // Which extra field groups show for each container type.
         const TYPE_FIELD_VISIBILITY = {
@@ -216,6 +225,48 @@
                 splitServiceMode: false
             },
         };
+        let portsOptionsHtml = '';
+        let classOptionsHtml = '';
+        let sizeOptionsHtml = '';
+
+
+        async function loadContainerLookups() {
+            const [portsRes, classesRes, sizesRes] = await Promise.all([
+                apiCall({
+                    mode: 'GET',
+                    url: '/api/ports?per_page=200'
+                }),
+                apiCall({
+                    mode: 'GET',
+                    url: '/api/containerClasses?per_page=200'
+                }),
+                apiCall({
+                    mode: 'GET',
+                    url: '/api/containerSizes?per_page=200'
+                }),
+            ]);
+
+            if (portsRes.success) {
+                portsOptionsHtml = portsRes.data.data
+                    .map((p) => `<option value="${p.port_id}">${p.code} - ${p.name}</option>`)
+                    .join('');
+            }
+            if (classesRes.success) {
+                classOptionsHtml = classesRes.data.data
+                    .map((c) => `<option value="${c.id}">${c.class}</option>`)
+                    .join('');
+            }
+            if (sizesRes.success) {
+                sizeOptionsHtml = sizesRes.data.data
+                    .map((s) => `<option value="${s.id}">${s.size}</option>`)
+                    .join('');
+            }
+        }
+
+        const serviceModeOptionsHtml = (placeholder) =>
+            `<option value="">${placeholder}</option>` +
+            SERVICE_MODE_OPTIONS.map((o) => `<option value="${o.value}">${o.label}</option>`).join('');
+
 
         // -------------------- STEPPER --------------------
         function showStage(stage) {
@@ -289,103 +340,124 @@
         // -------------------- STAGE 2: dynamic container cards --------------------
         function containerCardHtml(index) {
             return `
-            <div class="container-card border rounded-xl p-4 space-y-3" data-index="${index}">
-                <div class="flex justify-between items-center">
-                    <select data-field="container_type" class="type-select border rounded-lg px-3 py-2 text-sm font-semibold">
-                        ${CONTAINER_TYPES.map(t => `<option value="${t.value}">${t.label}</option>`).join('')}
-                    </select>
-                    <button type="button" class="remove-container text-red-500 text-xs font-medium">✕ Remove</button>
-                </div>
+    <div class="container-card border rounded-xl p-4 space-y-3" data-index="${index}">
+        <div class="flex justify-between items-center">
+            <select data-field="container_type" class="type-select border rounded-lg px-3 py-2 text-sm font-semibold">
+                ${CONTAINER_TYPES.map(t => `<option value="${t.value}">${t.label}</option>`).join('')}
+            </select>
+            <button type="button" class="remove-container text-red-500 text-xs font-medium">✕ Remove</button>
+        </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div>
-                        <label class="text-[11px] text-zinc-400 uppercase">Origin</label>
-                        <input type="text" data-field="origin" class="w-full border rounded-lg px-2 py-1.5 text-sm">
-                    </div>
-                    <div>
-                        <label class="text-[11px] text-zinc-400 uppercase">Destination</label>
-                        <input type="text" data-field="destination" class="w-full border rounded-lg px-2 py-1.5 text-sm">
-                    </div>
+        <input type="hidden" data-field="booking_unit_type">
 
-                    <div>
-                        <label class="text-[11px] text-zinc-400 uppercase">Booking Unit Type</label>
-                        <input type="text" data-field="booking_unit_type" class="w-full border rounded-lg px-2 py-1.5 text-sm">
-                    </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+                <label class="text-[11px] text-zinc-400 uppercase">Origin</label>
+                <select data-field="origin_port_id" class="w-full border rounded-lg px-2 py-1.5 text-sm">
+                    <option value="">Select Port</option>${portsOptionsHtml}
+                </select>
+            </div>
+            <div>
+                <label class="text-[11px] text-zinc-400 uppercase">Destination</label>
+                <select data-field="destination_port_id" class="w-full border rounded-lg px-2 py-1.5 text-sm">
+                    <option value="">Select Port</option>${portsOptionsHtml}
+                </select>
+            </div>
 
-                    <div class="field-convan-class hidden">
-                        <label class="text-[11px] text-zinc-400 uppercase">ConVan Class</label>
-                        <input type="text" data-field="convan_class" class="w-full border rounded-lg px-2 py-1.5 text-sm">
-                    </div>
-                    <div class="field-convan-size hidden">
-                        <label class="text-[11px] text-zinc-400 uppercase">ConVan Size</label>
-                        <input type="text" data-field="convan_size" class="w-full border rounded-lg px-2 py-1.5 text-sm">
-                    </div>
-                    <div class="field-temperature hidden">
-                        <label class="text-[11px] text-zinc-400 uppercase">Required Temperature (°C)</label>
-                        <input type="number" step="0.1" data-field="required_temperature" class="w-full border rounded-lg px-2 py-1.5 text-sm">
-                    </div>
+            <div class="field-convan-class hidden">
+                <label class="text-[11px] text-zinc-400 uppercase">ConVan Class</label>
+                <select data-field="container_class_id" class="w-full border rounded-lg px-2 py-1.5 text-sm">
+                    <option value="">Select Class</option>${classOptionsHtml}
+                </select>
+            </div>
+            <div class="field-convan-size hidden">
+                <label class="text-[11px] text-zinc-400 uppercase">ConVan Size</label>
+                <select data-field="container_size_id" class="w-full border rounded-lg px-2 py-1.5 text-sm">
+                    <option value="">Select Size</option>${sizeOptionsHtml}
+                </select>
+            </div>
+            <div class="field-temperature hidden">
+                <label class="text-[11px] text-zinc-400 uppercase">Required Temperature (°C)</label>
+                <input type="number" step="0.1" data-field="required_temperature" class="w-full border rounded-lg px-2 py-1.5 text-sm">
+            </div>
 
-                    <div>
-                        <label class="text-[11px] text-zinc-400 uppercase">Quantity</label>
-                        <input type="number" data-field="quantity" class="w-full border rounded-lg px-2 py-1.5 text-sm">
-                    </div>
+            <div>
+                <label class="text-[11px] text-zinc-400 uppercase">Quantity</label>
+                <input type="number" data-field="quantity" class="w-full border rounded-lg px-2 py-1.5 text-sm">
+            </div>
 
-                    <div class="field-cbm-ton hidden">
-                        <label class="text-[11px] text-zinc-400 uppercase">Estimated CBM/s</label>
-                        <input type="number" step="0.01" data-field="estimated_cbm" class="w-full border rounded-lg px-2 py-1.5 text-sm">
-                    </div>
-                    <div class="field-cbm-ton hidden">
-                        <label class="text-[11px] text-zinc-400 uppercase">Estimated Ton/s</label>
-                        <input type="number" step="0.01" data-field="estimated_ton" class="w-full border rounded-lg px-2 py-1.5 text-sm">
-                    </div>
+            <div class="field-cbm-ton hidden">
+                <label class="text-[11px] text-zinc-400 uppercase">Estimated CBM/s</label>
+                <input type="number" step="0.01" data-field="estimated_cbm" class="w-full border rounded-lg px-2 py-1.5 text-sm">
+            </div>
+            <div class="field-cbm-ton hidden">
+                <label class="text-[11px] text-zinc-400 uppercase">Estimated Ton/s</label>
+                <input type="number" step="0.01" data-field="estimated_ton" class="w-full border rounded-lg px-2 py-1.5 text-sm">
+            </div>
 
-                    <div>
-                        <label class="text-[11px] text-zinc-400 uppercase">Declared Value per Unit</label>
-                        <input type="number" step="0.01" data-field="declared_value_per_unit" class="w-full border rounded-lg px-2 py-1.5 text-sm">
-                    </div>
-                    <div>
-                        <label class="text-[11px] text-zinc-400 uppercase">Frequency</label>
-                        <input type="text" data-field="frequency" class="w-full border rounded-lg px-2 py-1.5 text-sm">
-                    </div>
+            <div>
+                <label class="text-[11px] text-zinc-400 uppercase">Declared Value per Unit</label>
+                <input type="number" step="0.01" data-field="declared_value_per_unit" class="w-full border rounded-lg px-2 py-1.5 text-sm">
+            </div>
+            <div>
+    <label class="text-[11px] text-zinc-400 uppercase">Frequency</label>
+    <select data-field="frequency" class="w-full border rounded-lg px-2 py-1.5 text-sm">
+        <option value="">Select Frequency</option>
+        <option value="Weekly">Weekly</option>
+        <option value="Monthly">Monthly</option>
+    </select>
+</div>
 
-                    <div class="md:col-span-2">
-                        <label class="text-[11px] text-zinc-400 uppercase">General Cargo Description</label>
-                        <textarea data-field="general_cargo_description" rows="2" class="w-full border rounded-lg px-2 py-1.5 text-sm"></textarea>
-                    </div>
+            <div class="md:col-span-2">
+                <label class="text-[11px] text-zinc-400 uppercase">General Cargo Description</label>
+                <textarea data-field="general_cargo_description" rows="2" class="w-full border rounded-lg px-2 py-1.5 text-sm"></textarea>
+            </div>
 
-                    <div class="field-split-service hidden">
-                        <label class="text-[11px] text-zinc-400 uppercase">Service Mode - Pier (Origin)</label>
-                        <input type="text" data-field="service_mode_origin" class="w-full border rounded-lg px-2 py-1.5 text-sm">
-                    </div>
-                    <div class="field-split-service hidden">
-                        <label class="text-[11px] text-zinc-400 uppercase">Service Mode - Pier (Destination)</label>
-                        <input type="text" data-field="service_mode_destination" class="w-full border rounded-lg px-2 py-1.5 text-sm">
-                    </div>
-                    <div class="field-single-service hidden md:col-span-2">
-                        <label class="text-[11px] text-zinc-400 uppercase">Service Mode</label>
-                        <input type="text" data-field="service_mode" class="w-full border rounded-lg px-2 py-1.5 text-sm">
-                    </div>
+            <div class="field-split-service hidden">
+                <label class="text-[11px] text-zinc-400 uppercase">Service Mode - Origin</label>
+                <select data-field="service_mode_origin" class="w-full border rounded-lg px-2 py-1.5 text-sm">
+                    ${serviceModeOptionsHtml('Select Mode')}
+                </select>
+            </div>
+            <div class="field-split-service hidden">
+                <label class="text-[11px] text-zinc-400 uppercase">Service Mode - Destination</label>
+                <select data-field="service_mode_destination" class="w-full border rounded-lg px-2 py-1.5 text-sm">
+                    ${serviceModeOptionsHtml('Select Mode')}
+                </select>
+            </div>
+            <div class="field-single-service hidden md:col-span-2">
+                <label class="text-[11px] text-zinc-400 uppercase">Service Mode</label>
+                <select data-field="service_mode" class="w-full border rounded-lg px-2 py-1.5 text-sm">
+                    ${serviceModeOptionsHtml('Select Mode')}
+                </select>
+            </div>
 
-                    <div class="md:col-span-2">
-                        <label class="flex items-center gap-2">
-                            <input type="checkbox" data-field="dangerous_cargo" class="dg-checkbox">
-                            <span class="text-sm">Dangerous Cargo (DG)</span>
-                        </label>
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="text-[11px] text-zinc-400 uppercase">DG Documentary Requirement</label>
-                        <textarea data-field="dg_documentary_requirement" rows="2" class="w-full border rounded-lg px-2 py-1.5 text-sm"></textarea>
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="text-[11px] text-zinc-400 uppercase">Special Requirements</label>
-                        <textarea data-field="special_requirements" rows="2" class="w-full border rounded-lg px-2 py-1.5 text-sm"></textarea>
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="text-[11px] text-zinc-400 uppercase">Special Notes</label>
-                        <textarea data-field="special_notes" rows="2" class="w-full border rounded-lg px-2 py-1.5 text-sm"></textarea>
-                    </div>
-                </div>
-            </div>`;
+            <div class="md:col-span-2">
+                <label class="flex items-center gap-2">
+                    <input type="checkbox" data-field="dangerous_cargo" class="dg-checkbox">
+                    <span class="text-sm">Dangerous Cargo (DG)</span>
+                </label>
+            </div>
+            <div class="md:col-span-2">
+                <label class="text-[11px] text-zinc-400 uppercase">DG Documentary Requirement</label>
+                <input type="file" class="dg-file-input w-full border rounded-lg px-2 py-1.5 text-sm"
+                       accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                <p class="text-xs text-zinc-400 mt-1">
+                    Upload the supporting DG document (e.g. MSDS, DG declaration). PDF, JPG, PNG, DOC/DOCX up to 10MB.
+                </p>
+                <p class="dg-file-status text-xs text-zinc-500 mt-1"></p>
+                <input type="hidden" data-field="dg_documentary_requirement">
+            </div>
+            <div class="md:col-span-2">
+                <label class="text-[11px] text-zinc-400 uppercase">Special Requirements</label>
+                <textarea data-field="special_requirements" rows="2" class="w-full border rounded-lg px-2 py-1.5 text-sm"></textarea>
+            </div>
+            <div class="md:col-span-2">
+                <label class="text-[11px] text-zinc-400 uppercase">Special Notes</label>
+                <textarea data-field="special_notes" rows="2" class="w-full border rounded-lg px-2 py-1.5 text-sm"></textarea>
+            </div>
+        </div>
+    </div>`;
         }
 
         function applyTypeVisibility(card) {
@@ -401,15 +473,72 @@
             card.querySelector('.field-single-service').classList.toggle('hidden', flags.splitServiceMode);
         }
 
+        function syncBookingUnitType(card) {
+            const typeSelect = card.querySelector('.type-select');
+            const label = typeSelect.options[typeSelect.selectedIndex]?.textContent ?? '';
+            card.querySelector('[data-field="booking_unit_type"]').value = label;
+        }
+
+
+        async function uploadDgFile(file) {
+            const formData = new FormData();
+            formData.append('dg_document', file);
+
+            const response = await apiCall({
+                mode: 'POST',
+                isJson: false,
+                payload: formData,
+                url: '/api/crm/leads/uploadDgDocument',
+            });
+
+            if (!response.success) {
+                showMessage({
+                    status: 'error',
+                    title: 'Upload failed',
+                    message: response.message ?? 'Unable to upload the DG document.',
+                });
+                return null;
+            }
+
+            return response.data.path;
+        }
+
+
+
         function addContainerCard() {
             const wrap = document.getElementById('containersContainer');
             const index = wrap.children.length;
             wrap.insertAdjacentHTML('beforeend', containerCardHtml(index));
             const card = wrap.lastElementChild;
 
-            card.querySelector('.type-select').addEventListener('change', () => applyTypeVisibility(card));
+            card.querySelector('.type-select').addEventListener('change', () => {
+                applyTypeVisibility(card);
+                syncBookingUnitType(card);
+            });
             card.querySelector('.remove-container').addEventListener('click', () => card.remove());
+
+            card.querySelector('.dg-file-input').addEventListener('change', async function() {
+                const file = this.files[0];
+                const statusEl = card.querySelector('.dg-file-status');
+                const hiddenField = card.querySelector('[data-field="dg_documentary_requirement"]');
+
+                if (!file) return;
+
+                statusEl.textContent = 'Uploading...';
+                const path = await uploadDgFile(file);
+
+                if (!path) {
+                    statusEl.textContent = '';
+                    this.value = '';
+                    return;
+                }
+
+                hiddenField.value = path;
+                statusEl.textContent = `Uploaded: ${file.name}`;
+            });
+
             applyTypeVisibility(card);
+            syncBookingUnitType(card);
         }
 
         document.getElementById('addContainerBtn').addEventListener('click', addContainerCard);
@@ -510,18 +639,27 @@
                 if (el) el.value = company[key] ?? '';
             });
 
+            document.getElementById('containersContainer').innerHTML = [];
             document.getElementById('containersContainer').innerHTML = '';
             (lead.containers || []).forEach(c => {
                 addContainerCard();
                 const card = document.getElementById('containersContainer').lastElementChild;
+
                 Object.entries(c).forEach(([key, val]) => {
                     const el = card.querySelector(`[data-field="${key}"]`);
                     if (!el) return;
                     if (el.type === 'checkbox') el.checked = Boolean(val);
                     else el.value = val ?? '';
                 });
+
                 card.querySelector('.type-select').value = c.container_type;
                 applyTypeVisibility(card);
+                syncBookingUnitType(card);
+
+                if (c.dg_documentary_requirement) {
+                    card.querySelector('.dg-file-status').textContent =
+                        `Existing file on record. Choose a new file only if you want to replace it.`;
+                }
             });
 
             showStage(lead.current_stage || 1);
@@ -529,7 +667,9 @@
 
         // -------------------- INIT --------------------
         showStage(1);
-        fillTypeOfBusiness().then(() => {
+        fillTypeOfBusiness();
+
+        loadContainerLookups().then(() => {
             if (leadUuid) {
                 hydrateExisting();
             } else {

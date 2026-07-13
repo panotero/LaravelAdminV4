@@ -9,15 +9,15 @@ class CrmLeadContainer extends Model
     protected $fillable = [
         'lead_id',
         'container_type',
-        'origin',
-        'destination',
+        'origin_port_id',
+        'destination_port_id',
         'booking_unit_type',
         'quantity',
         'declared_value_per_unit',
         'frequency',
         'general_cargo_description',
-        'convan_class',
-        'convan_size',
+        'container_class_id',
+        'container_size_id',
         'required_temperature',
         'estimated_cbm',
         'estimated_ton',
@@ -49,5 +49,25 @@ class CrmLeadContainer extends Model
     public function lead()
     {
         return $this->belongsTo(CrmLead::class, 'lead_id');
+    }
+
+    public function originPort()
+    {
+        return $this->belongsTo(Port::class, 'origin_port_id', 'port_id');
+    }
+
+    public function destinationPort()
+    {
+        return $this->belongsTo(Port::class, 'destination_port_id', 'port_id');
+    }
+
+    public function containerClass()
+    {
+        return $this->belongsTo(ContainerClass::class, 'container_class_id');
+    }
+
+    public function containerSize()
+    {
+        return $this->belongsTo(ContainerSize::class, 'container_size_id');
     }
 }

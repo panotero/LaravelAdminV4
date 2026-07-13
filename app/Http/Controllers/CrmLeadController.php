@@ -12,9 +12,18 @@ use Carbon\Carbon;
 use Illuminate\Support\Str;
 use App\Models\CrmLeadContainer;
 use Illuminate\Support\Facades\Validator;
+use App\Services\FileUploadService;
 
 class CrmLeadController extends Controller
 {
+
+
+    protected $fileUploadService;
+
+    public function __construct(FileUploadService $fileUploadService)
+    {
+        $this->fileUploadService = $fileUploadService;
+    }
     //
     public function index(Request $request)
     {
@@ -180,11 +189,11 @@ class CrmLeadController extends Controller
         $validated = $request->validate([
             'containers' => ['required', 'array', 'min:1'],
             'containers.*.container_type' => ['required', 'in:CV,FR,RF,LC,RC'],
-            'containers.*.origin' => ['nullable', 'string', 'max:255'],
-            'containers.*.destination' => ['nullable', 'string', 'max:255'],
+            'containers.*.origin_port_id' => ['required', 'integer', 'exists:ports,port_id'],
+            'containers.*.destination_port_id' => ['required', 'integer', 'exists:ports,port_id'],
             'containers.*.booking_unit_type' => ['nullable', 'string', 'max:255'],
-            'containers.*.convan_class' => ['nullable', 'string', 'max:255'],
-            'containers.*.convan_size' => ['nullable', 'string', 'max:255'],
+            'containers.*.container_class_id' => ['nullable', 'integer', 'exists:container_class,id'],
+            'containers.*.container_size_id' => ['nullable', 'integer', 'exists:container_size,id'],
             'containers.*.required_temperature' => ['nullable', 'numeric'],
             'containers.*.quantity' => ['nullable', 'integer', 'min:0'],
             'containers.*.estimated_cbm' => ['nullable', 'numeric', 'min:0'],
@@ -192,11 +201,11 @@ class CrmLeadController extends Controller
             'containers.*.declared_value_per_unit' => ['nullable', 'numeric', 'min:0'],
             'containers.*.frequency' => ['nullable', 'string', 'max:255'],
             'containers.*.general_cargo_description' => ['nullable', 'string'],
-            'containers.*.service_mode_origin' => ['nullable', 'string', 'max:255'],
-            'containers.*.service_mode_destination' => ['nullable', 'string', 'max:255'],
-            'containers.*.service_mode' => ['nullable', 'string', 'max:255'],
+            'containers.*.service_mode_origin' => ['nullable', 'in:PIER,DOOR'],
+            'containers.*.service_mode_destination' => ['nullable', 'in:PIER,DOOR'],
+            'containers.*.service_mode' => ['nullable', 'in:PIER,DOOR'],
             'containers.*.dangerous_cargo' => ['nullable', 'boolean'],
-            'containers.*.dg_documentary_requirement' => ['nullable', 'string'],
+            'containers.*.dg_documentary_requirement' => ['nullable', 'string', 'max:255'],
             'containers.*.special_requirements' => ['nullable', 'string'],
             'containers.*.special_notes' => ['nullable', 'string'],
         ]);
@@ -215,6 +224,29 @@ class CrmLeadController extends Controller
         });
 
         return response()->json(['success' => true, 'data' => $lead->fresh()->load('containers')]);
+    }
+
+    /**
+     * Uploads a single DG (dangerous goods) supporting document and
+     * returns its stored path. The Stage 2 form calls this as soon as
+     * a file is chosen for a container row, then submits the returned
+     * path as `dg_documentary_requirement` in the normal stage2 payload.
+     */
+    public function uploadDgDocument(Request $request)
+    {
+        $validated = $request->validate([
+            'dg_document' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png,doc,docx', 'max:10240'],
+        ]);
+
+        $paths = $this->fileUploadService->uploadFile(
+            [$validated['dg_document']],
+            'uploads/crm/dg-documents'
+        );
+
+        return response()->json([
+            'success' => true,
+            'data' => ['path' => $paths[0] ?? null],
+        ]);
     }
 
     public function store(Request $request)
@@ -271,18 +303,17 @@ class CrmLeadController extends Controller
 
     public function show($uuid)
     {
-
         $lead = CrmLead::with(
             'company',
             'notes.user',
             'activities.user',
             'crmStatus:id,status',
             'user',
-            'proposals.status'
+            'proposals.status',
+            'containers'
         )->where('uuid', $uuid)->firstOrFail();
 
         return response()->json([
-
             'success' => true,
             'data' => $lead
         ]);
