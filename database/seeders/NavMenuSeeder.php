@@ -24,9 +24,9 @@ class NavMenuSeeder extends Seeder
                 'menu_order' => '0'
             ],
             [
-                'title' => 'User Management',
+                'title' => 'Users',
                 'icon' => 'fas fa-users',
-                'link' => '/page_users',
+                'link' => '/page_usermanagement',
                 'allowed_roles' => json_encode(['1']),
                 'parent_menu' => '0',
                 'menu_order' => '6'

@@ -43,7 +43,6 @@ Route::middleware(['auth'])->group(function () {
 
 
     Route::post('/notifications/mark-read', [NotificationController::class, 'markRead']);
-    Route::post('/documents/route', [RoutingController::class, 'routeDocument']);
     Route::get('/notifications/stream', [NotificationController::class, 'stream']);
 
 
@@ -72,73 +71,6 @@ Route::middleware(['auth'])->group(function () {
 
 
 
-    Route::prefix('options')->group(function () {
-        Route::get('/', [OptionController::class, 'index']);
-        Route::post('/', [OptionController::class, 'store']);
-        Route::get('/{id}', [OptionController::class, 'show']);
-        Route::put('/{id}', [OptionController::class, 'update']);
-        Route::delete('/', [OptionController::class, 'destroy']);
-
-        Route::get('/{optionId}/values', [ListOfValueController::class, 'byOption']);
-        Route::post('/{optionId}/values', [ListOfValueController::class, 'storeByOption']);
-    });
-
-
-    // Global LOV routes (if you still want independent access)
-    Route::prefix('lov')->group(function () {
-
-        Route::get('/', [ListOfValueController::class, 'index']);
-        Route::post('/', [ListOfValueController::class, 'store']);
-        Route::get('/{id}', [ListOfValueController::class, 'show']);
-        Route::put('/{id}', [ListOfValueController::class, 'update']);
-        Route::delete('/', [ListOfValueController::class, 'destroy']);
-    });
-
-    Route::prefix('companies')->group(function () {
-
-        Route::get('/', [CompanyController::class, 'index']);
-        Route::post('/', [CompanyController::class, 'store']);
-        Route::get('/{id}', [CompanyController::class, 'show']);
-        Route::put('/{id}', [CompanyController::class, 'update']);
-        Route::delete('/{id}', [CompanyController::class, 'destroy']);
-    });
-
-
-    Route::prefix('crm')->group(function () {
-
-        // LEADS (create full lead package)
-        Route::post('/leads', [CrmLeadController::class, 'store']);
-        Route::get('/leads', [CrmLeadController::class, 'index']);
-        Route::get('/leads/{uuid}', [CrmLeadController::class, 'show']);
-        Route::put('/leads/{uuid}', [CrmLeadController::class, 'update']);
-        Route::delete('/leads/{uuid}', [CrmLeadController::class, 'destroy']);
-
-        // STATUS CRUD
-        Route::get('/getCrmStatus', [CrmStatusController::class, 'index']);
-
-        // ACTIVITIES CRUD
-        Route::apiResource('activities', CrmActivityController::class);
-
-        // TEST BY PAGE FETCHING
-        Route::get('/leads/datatables', [CrmLeadController::class, 'datatable']);
-
-        Route::post('/note', [CrmNoteController::class, 'store']);
-        Route::post('/activity', [CrmActivityController::class, 'store']);
-        Route::post('/leads/stage1', [CrmLeadController::class, 'saveStage1']);
-        Route::post('/leads/{uuid}/stage2', [CrmLeadController::class, 'saveStage2']);
-    });
-
-
-    Route::prefix('listofval')->group(function () {
-        Route::get('/route', [LovController::class, 'route']);
-        Route::get('/service', [LovController::class, 'service']);
-        Route::get('/vanclass', [LovController::class, 'vanclass']);
-        Route::get('/vantype', [LovController::class, 'vantype']);
-        Route::get('/vansize', [LovController::class, 'vansize']);
-        Route::get('/typeofbusiness', [LovController::class, 'typeOfBusiness']);
-    });
-    Route::post('/leads/uploadDgDocument', [CrmLeadController::class, 'uploadDgDocument']);
-
 
     Route::get('/roles', fn() => DB::table('setting_role')->get());
 
@@ -148,44 +80,6 @@ Route::middleware(['auth'])->group(function () {
             'success' => true,
             'message' => 'API successfully triggered!',
         ]);
-    });
-
-    Route::prefix('clientMasters')->group(function () {
-        Route::get('/', [ClientMasterController::class, 'index']);
-        Route::get('/{uuid}', [ClientMasterController::class, 'show']);
-        Route::post('/stage1', [ClientMasterController::class, 'saveStage1']);
-        Route::post('/{uuid}/stage2', [ClientMasterController::class, 'saveStage2']);
-        Route::post('/{uuid}/stage3', [ClientMasterController::class, 'saveStage3']);
-        Route::delete('/{uuid}', [ClientMasterController::class, 'destroy']);
-
-        // Client-scoped proposal list/create (used inside the Client Master modal)
-        Route::get('/{uuid}/proposals', [ClientProposalController::class, 'index']);
-        Route::post('/{uuid}/proposals', [ClientProposalController::class, 'store']);
-
-        Route::get('/{uuid}/contracts', [ClientContractController::class, 'index']);
-        Route::post('/{uuid}/contracts', [ClientContractController::class, 'store']);
-    });
-
-    // Global proposal actions - used by the Proposals tab (and re-used by the
-    // client modal for container/status actions). Static segments MUST come
-    // before the {proposal} wildcard route.
-    Route::prefix('clientProposals')->group(function () {
-        Route::get('/', [ClientProposalController::class, 'indexAll']);
-        Route::get('/rateLookup', [ClientProposalController::class, 'rateLookup']);
-        Route::delete('/rates/{rate}', [ClientProposalController::class, 'destroyRate']);
-
-        Route::get('/{proposal}', [ClientProposalController::class, 'show']);
-        Route::post('/{proposal}/rates', [ClientProposalController::class, 'addRates']);
-        Route::post('/{proposal}/approve', [ClientProposalController::class, 'approve']);
-        Route::post('/{proposal}/disapprove', [ClientProposalController::class, 'disapprove']);
-        Route::post('/{proposal}/reject', [ClientProposalController::class, 'reject']);
-        Route::post('/{proposal}/attachSigned', [ClientProposalController::class, 'attachSigned']);
-        Route::get('/{proposal}/pdf', [ClientProposalController::class, 'downloadPdf']);
-    });
-    Route::prefix('clientContracts')->group(function () {
-        Route::get('/', [ClientContractController::class, 'indexAll']);
-        Route::get('/{contract}', [ClientContractController::class, 'show']);
-        Route::get('/{contract}/pdf', [ClientContractController::class, 'downloadPdf']);
     });
 
     require __DIR__ . '/api_maintenance.php';

@@ -49,7 +49,6 @@ Route::middleware(['auth', 'check.status', 'prevent-back-history'])->group(funct
     require __DIR__ . '/mailer.php';
 
 
-    Route::get('/createpdf/{id}', [ProposalController::class, 'createPdf']);
 
 
     Route::resource('users', UserController::class)->middleware('can:isSuperAdmin');
