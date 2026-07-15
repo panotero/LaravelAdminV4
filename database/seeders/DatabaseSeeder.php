@@ -27,12 +27,6 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             Setting_roleSeeder::class,
 
-            //kargamine seeder
-            CrmStatusSeeder::class,
-            lovSeeder::class,
-            PortSeeder::class,
-            departmentSeeder::class,
-            userstatusSeeder::class
         ]);
     }
 }

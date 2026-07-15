@@ -55,62 +55,6 @@ class NavMenuSeeder extends Seeder
                 'parent_menu' => '3',
                 'menu_order' => '2'
             ],
-            [
-                'title' => 'Settings',
-                'icon' => '',
-                'link' => '#',
-                'allowed_roles' => json_encode(['1', '2', '3', '4']),
-                'parent_menu' => '0',
-                'menu_order' => '7'
-            ],
-            [
-                'title' => 'App Settings',
-                'icon' => '',
-                'link' => '/page_maintenance',
-                'allowed_roles' => json_encode(['1', '2', '3', '4']),
-                'parent_menu' => '6',
-                'menu_order' => '1'
-            ],
-            [
-                'title' => 'Shipper/Consignee',
-                'icon' => '',
-                'link' => '/page_shipperConsignee',
-                'allowed_roles' => json_encode(['1', '2', '3', '4']),
-                'parent_menu' => '0',
-                'menu_order' => '3'
-            ],
-            [
-                'title' => 'Contracts',
-                'icon' => '',
-                'link' => '/page_contracts',
-                'allowed_roles' => json_encode(['1', '2', '3', '4']),
-                'parent_menu' => '0',
-                'menu_order' => '4'
-            ],
-            [
-                'title' => 'Reports',
-                'icon' => '',
-                'link' => '/page_reports',
-                'allowed_roles' => json_encode(['1', '2', '3', '4']),
-                'parent_menu' => '0',
-                'menu_order' => '5'
-            ],
-            [
-                'title' => 'Lookup Values',
-                'icon' => '',
-                'link' => '/page_lookupValues',
-                'allowed_roles' => json_encode(['1']),
-                'parent_menu' => '3',
-                'menu_order' => '3'
-            ],
-            [
-                'title' => 'CRM',
-                'icon' => '',
-                'link' => '/page_crm',
-                'allowed_roles' => json_encode(['1']),
-                'parent_menu' => '0',
-                'menu_order' => '2'
-            ]
         ];
 
         foreach ($menu_array as $menu) {
