@@ -9,21 +9,7 @@ use App\Http\Controllers\MailerController;
 use App\Http\Controllers\MenusController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\RoutingController;
-use App\Http\Controllers\CompanyController;
-use App\Http\Controllers\OptionController;
-use App\Http\Controllers\ListOfValueController;
-use App\Http\Controllers\CrmLeadController;
-use App\Http\Controllers\CrmStatusController;
-use App\Http\Controllers\CrmActivityController;
-use App\Http\Controllers\CrmNoteController;
-use App\Http\Controllers\ProposalController;
-use App\Http\Controllers\LovController;
-use App\Http\Controllers\ContractController;
-use App\Http\Controllers\ClientMasterController;
-use App\Http\Controllers\ClientContractController;
-use App\Http\Controllers\ClientProposalController;
-
+use App\Http\Controllers\RoleController;
 
 /*
 |--------------------------------------------------------------------------
@@ -72,7 +58,12 @@ Route::middleware(['auth'])->group(function () {
 
 
 
-    Route::get('/roles', fn() => DB::table('setting_role')->get());
+    Route::prefix('roles')->group(function () {
+        Route::get('/', [RoleController::class, 'index']);
+        Route::post('/', [RoleController::class, 'store']);
+        Route::put('/{id}', [RoleController::class, 'update']);
+        Route::delete('/{id}', [RoleController::class, 'destroy']);
+    });
 
     Route::post('/test-api', function (Request $request) {
         Log::info('Test API triggered', $request->all());

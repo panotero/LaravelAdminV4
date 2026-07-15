@@ -56,7 +56,7 @@ class LoginRequest extends FormRequest
         ]);
 
         // Check if user is deactivated
-        if ($user->status === 'deactivated') {
+        if ($user->status === 1) {
             Log::warning('Deactivated user tried to login', ['email' => $this->email]);
             throw \Illuminate\Validation\ValidationException::withMessages([
                 'email' => __('Your account is deactivated. Please contact admin.'),
