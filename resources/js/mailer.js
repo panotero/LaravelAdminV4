@@ -1,10 +1,15 @@
+const STATUS_CLASSES = {
+  pending: "p-2 rounded-lg mb-3 text-sm bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200",
+  success: "p-2 rounded-lg mb-3 text-sm bg-green-50 dark:bg-green-950/40 text-green-700 dark:text-green-400",
+  error: "p-2 rounded-lg mb-3 text-sm bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400",
+};
+
 document.addEventListener("click", async function (event) {
   if (event.target && event.target.id === "triggerApiBtn") {
     const status = document.getElementById("apiStatus");
 
-    status.style.display = "block";
-    status.style.background = "#eee";
-    status.style.color = "#000";
+    status.className = STATUS_CLASSES.pending;
+    status.classList.remove("hidden");
     status.textContent = "Sending...";
 
     try {
@@ -22,18 +27,15 @@ document.addEventListener("click", async function (event) {
       const result = await response.json();
 
       if (response.ok && result.success) {
-        status.style.background = "#d4edda";
-        status.style.color = "#155724";
+        status.className = STATUS_CLASSES.success;
         status.textContent = result.message;
       } else {
-        status.style.background = "#f8d7da";
-        status.style.color = "#721c24";
+        status.className = STATUS_CLASSES.error;
         status.textContent = result.message || "Failed";
       }
     } catch (err) {
-      status.style.background = "#f8d7da";
-      status.style.color = "#721c24";
-      status.textContent = "rror: " + err.message;
+      status.className = STATUS_CLASSES.error;
+      status.textContent = "Error: " + err.message;
     }
   }
 });
@@ -54,7 +56,7 @@ document.addEventListener("submit", async function (e) {
     body: form.querySelector('textarea[name="body"]').value,
   };
 
-  statusBox.className = "p-2 rounded mb-3 bg-gray-100 text-gray-700";
+  statusBox.className = STATUS_CLASSES.pending;
   statusBox.textContent = "Sending...";
   statusBox.classList.remove("hidden");
 
@@ -73,15 +75,15 @@ document.addEventListener("submit", async function (e) {
     const result = await response.json();
 
     if (response.ok && result.success) {
-      statusBox.className = "p-2 rounded mb-3 bg-green-100 text-green-700";
+      statusBox.className = STATUS_CLASSES.success;
       statusBox.textContent = result.message;
       form.reset();
     } else {
-      statusBox.className = "p-2 rounded mb-3 bg-red-100 text-red-700";
+      statusBox.className = STATUS_CLASSES.error;
       statusBox.textContent = result.message || "Failed to send mail.";
     }
   } catch (err) {
-    statusBox.className = "p-2 rounded mb-3 bg-red-100 text-red-700";
+    statusBox.className = STATUS_CLASSES.error;
     statusBox.textContent = "Error: " + err.message;
   }
 

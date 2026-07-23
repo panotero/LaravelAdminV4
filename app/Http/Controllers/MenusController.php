@@ -93,15 +93,7 @@ class MenusController extends Controller
         ]);
 
         try {
-            $data = $request->validate([
-                'title' => 'required|string',
-                'icon' => 'nullable|string',
-                'link' => 'nullable|string',
-                'allowed_roles' => 'nullable',
-                'allowed_offices' => 'nullable',
-                'parent_menu' => 'nullable|integer',
-                'menu_order' => 'nullable|integer',
-            ]);
+            $data = $validator->validated();
 
             $parentId = $data['parent_menu'] ?? 0;
             $maxOrder = NavMenu::where('parent_menu', $parentId)->max('menu_order');
@@ -186,14 +178,7 @@ class MenusController extends Controller
         try {
             $menu = NavMenu::findOrFail($id);
 
-            $data = $request->validate([
-                'title' => 'required|string',
-                'icon' => 'nullable|string',
-                'link' => 'nullable|string',
-                'allowed_roles' => 'nullable',
-                'allowed_office' => 'nullable|string',
-                'parent_menu' => 'nullable|integer',
-            ]);
+            $data = $validator->validated();
 
             $menu->update($data);
 
